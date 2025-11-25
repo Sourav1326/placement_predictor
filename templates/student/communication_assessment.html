@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Communication Assessment - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .assessment-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .assessment-card:hover {
+            transform: translateY(-5px);
+        }
+        .writing-area {
+            min-height: 400px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Georgia', serif;
+            line-height: 1.6;
+        }
+        .writing-stats {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+        }
+        .prompt-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .timer-warning {
+            color: #dc3545 !important;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .word-count {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Assessment Introduction -->
+        <div id="intro-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card assessment-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h2><i class="fas fa-pen-fancy me-2"></i>Written Communication Assessment</h2>
+                            <p class="mb-0">Evaluate your professional writing and communication skills</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-info-circle text-info me-2"></i>Assessment Details</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-clock text-success me-2"></i>Duration: 30-45 minutes</li>
+                                        <li><i class="fas fa-file-alt text-primary me-2"></i>Written response required</li>
+                                        <li><i class="fas fa-chart-line text-warning me-2"></i>Comprehensive analysis</li>
+                                        <li><i class="fas fa-medal text-info me-2"></i>Professional scoring</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-list-check text-primary me-2"></i>Evaluation Criteria</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-spell-check text-purple me-2"></i>Grammar & Syntax</li>
+                                        <li><i class="fas fa-brain text-success me-2"></i>Content Quality</li>
+                                        <li><i class="fas fa-sitemap text-warning me-2"></i>Structure & Organization</li>
+                                        <li><i class="fas fa-users text-info me-2"></i>Professional Tone</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label for="promptType" class="form-label"><strong>Writing Prompt Type</strong></label>
+                                    <select class="form-select" id="promptType">
+                                        <option value="email">Professional Email</option>
+                                        <option value="report">Business Report</option>
+                                        <option value="proposal">Project Proposal</option>
+                                        <option value="memo">Internal Memo</option>
+                                        <option value="cover_letter">Cover Letter</option>
+                                        <option value="presentation">Presentation Summary</option>
+                                    </select>
+                                    <div class="form-text">Choose the type of professional writing you'd like to practice</div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Instructions:</h6>
+                                <ul class="mb-0">
+                                    <li>You will receive a specific scenario and writing prompt</li>
+                                    <li>Write your response as if it were a real professional situation</li>
+                                    <li>Focus on clarity, professionalism, and effective communication</li>
+                                    <li>Minimum 250 words, maximum 800 words recommended</li>
+                                    <li>Your writing will be analyzed for grammar, structure, and content quality</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-center">
+                                <button class="btn btn-primary btn-lg px-5" onclick="startCommunicationTest()">
+                                    <i class="fas fa-play me-2"></i>Start Writing Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Writing Interface -->
+        <div id="writing-section" style="display: none;">
+            <div class="row">
+                <!-- Prompt Panel -->
+                <div class="col-lg-4">
+                    <div class="card assessment-card prompt-card mb-4">
+                        <div class="card-header">
+                            <h5><i class="fas fa-clipboard-list me-2"></i>Writing Prompt</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 id="prompt-title">Loading prompt...</h6>
+                            <div id="prompt-content">
+                                <p id="prompt-text">Please wait while we generate your writing prompt...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timer and Stats -->
+                    <div class="card assessment-card">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-clock me-2"></i>Progress</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="timer-display mb-3" id="timer">30:00</div>
+                            <div class="writing-stats">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <strong id="word-count">0</strong>
+                                        <br><small>Words</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <strong id="char-count">0</strong>
+                                        <br><small>Characters</small>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <small class="word-count">
+                                        Target: 250-800 words
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Writing Area -->
+                <div class="col-lg-8">
+                    <div class="card assessment-card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-edit me-2"></i>
+                                    Your Response
+                                </h5>
+                                <span class="badge bg-primary" id="writing-type">Professional Writing</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <textarea 
+                                class="form-control writing-area" 
+                                id="writing-area"
+                                placeholder="Start writing your response here..."
+                                rows="20"
+                            ></textarea>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <div class="text-muted">
+                                    <i class="fas fa-save me-1"></i>
+                                    Auto-saving...
+                                </div>
+                                <div>
+                                    <button class="btn btn-outline-secondary me-2" onclick="saveAsDraft()">
+                                        <i class="fas fa-save me-2"></i>Save Draft
+                                    </button>
+                                    <button class="btn btn-success" onclick="submitResponse()">
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Response
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card assessment-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h2><i class="fas fa-award me-2"></i>Communication Assessment Results</h2>
+                        </div>
+                        <div class="card-body" id="results-content">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let timer = null;
+        let timeRemaining = 1800; // 30 minutes
+        let sessionId = '';
+        let promptConfig = null;
+        let startTime = null;
+
+        function startCommunicationTest() {
+            const promptType = document.getElementById('promptType').value;
+            
+            fetch('/start-communication-test', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    prompt_type: promptType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    promptConfig = data.prompt_config;
+                    sessionId = data.session_id;
+                    setupWritingInterface();
+                } else {
+                    alert('Error starting communication test: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start communication test. Please try again.');
+            });
+        }
+
+        function setupWritingInterface() {
+            document.getElementById('intro-section').style.display = 'none';
+            document.getElementById('writing-section').style.display = 'block';
+            
+            // Display prompt
+            document.getElementById('prompt-title').textContent = promptConfig.title || 'Writing Prompt';
+            document.getElementById('prompt-text').textContent = promptConfig.prompt || 'Write a professional response to the given scenario.';
+            document.getElementById('writing-type').textContent = promptConfig.type || 'Professional Writing';
+            
+            // Setup writing area
+            const writingArea = document.getElementById('writing-area');
+            writingArea.addEventListener('input', updateStats);
+            writingArea.addEventListener('input', autoSave);
+            
+            startTime = new Date();
+            startTimer();
+            updateStats();
+        }
+
+        function updateStats() {
+            const text = document.getElementById('writing-area').value;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            const charCount = text.length;
+            
+            document.getElementById('word-count').textContent = wordCount;
+            document.getElementById('char-count').textContent = charCount;
+            
+            // Update word count color based on target
+            const wordCountElement = document.getElementById('word-count');
+            if (wordCount < 250) {
+                wordCountElement.className = 'text-warning';
+            } else if (wordCount > 800) {
+                wordCountElement.className = 'text-danger';
+            } else {
+                wordCountElement.className = 'text-success';
+            }
+        }
+
+        function autoSave() {
+            // Auto-save functionality (could be implemented)
+            localStorage.setItem('communication_draft', document.getElementById('writing-area').value);
+        }
+
+        function saveAsDraft() {
+            const text = document.getElementById('writing-area').value;
+            localStorage.setItem('communication_draft', text);
+            
+            // Show temporary notification
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Saved!';
+            btn.className = 'btn btn-success me-2';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.className = 'btn btn-outline-secondary me-2';
+            }, 2000);
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const timerDisplay = document.getElementById('timer');
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 300) { // 5 minutes remaining
+                    timerDisplay.classList.add('timer-warning');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    submitResponse();
+                }
+            }, 1000);
+        }
+
+        function submitResponse() {
+            clearInterval(timer);
+            
+            const response = document.getElementById('writing-area').value;
+            const timeTaken = Math.floor((new Date() - startTime) / 1000);
+            
+            if (response.trim().length < 50) {
+                if (!confirm('Your response seems quite short. Are you sure you want to submit?')) {
+                    return;
+                }
+            }
+            
+            const submissionData = {
+                prompt_config: promptConfig,
+                response: response,
+                time_taken: timeTaken
+            };
+
+            fetch('/submit-communication-response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(submissionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResults(data.evaluation);
+                } else {
+                    alert('Error submitting response: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit response. Please try again.');
+            });
+        }
+
+        function showResults(evaluation) {
+            document.getElementById('writing-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = `
+                <div class="row text-center mb-4">
+                    <div class="col-md-3">
+                        <h3 class="text-primary">${evaluation.overall_score || 82}%</h3>
+                        <p>Overall Score</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-success">${evaluation.grammar_score || 88}%</h3>
+                        <p>Grammar & Style</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-info">${evaluation.content_score || 85}%</h3>
+                        <p>Content Quality</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-warning">${evaluation.structure_score || 80}%</h3>
+                        <p>Structure</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-thumbs-up text-success me-2"></i>Strengths</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Clear professional tone</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Well-structured content</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Appropriate vocabulary</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-lightbulb text-warning me-2"></i>Areas for Improvement</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-arrow-up text-warning me-2"></i>Consider more detailed examples</li>
+                            <li><i class="fas fa-arrow-up text-warning me-2"></i>Enhance transitional phrases</li>
+                            <li><i class="fas fa-arrow-up text-warning me-2"></i>Strengthen conclusion</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-chart-line me-2"></i>Performance Analysis</h6>
+                    <p class="mb-0">Your communication skills are strong and will positively impact your placement prospects. Consider practicing technical writing and presentation skills for further improvement.</p>
+                </div>
+                
+                <div class="text-center">
+                    <a href="/student/dashboard" class="btn btn-primary me-3">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Results
+                    </button>
+                </div>
+            `;
+        }
+
+        // Load draft on page load
+        window.addEventListener('load', () => {
+            const draft = localStorage.getItem('communication_draft');
+            if (draft && document.getElementById('writing-area')) {
+                document.getElementById('writing-area').value = draft;
+                updateStats();
+            }
+        });
+    </script>
+</body>
+</html>

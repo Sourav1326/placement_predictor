@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mock Interview - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .interview-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .interview-card:hover {
+            transform: translateY(-5px);
+        }
+        .question-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            min-height: 250px;
+        }
+        .response-area {
+            min-height: 200px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background: #ffffff;
+        }
+        .timer-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .timer-warning {
+            color: #dc3545 !important;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .recording-indicator {
+            width: 20px;
+            height: 20px;
+            background: #dc3545;
+            border-radius: 50%;
+            animation: recording-pulse 1.5s infinite;
+        }
+        @keyframes recording-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.1); }
+        }
+        .feedback-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+        }
+        .score-badge {
+            font-size: 1.2rem;
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+        .star-method-indicator {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+            color: white;
+        }
+        .star-complete { background: #28a745; }
+        .star-partial { background: #ffc107; color: #333; }
+        .star-missing { background: #dc3545; }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Interview Setup -->
+        <div id="setup-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card interview-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h2><i class="fas fa-microphone me-2"></i>Mock Interview Simulator</h2>
+                            <p class="mb-0">Practice interviews with real-time AI feedback and STAR method analysis</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-info-circle text-info me-2"></i>Interview Features</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-microphone text-success me-2"></i>Voice recording capability</li>
+                                        <li><i class="fas fa-brain text-primary me-2"></i>AI-powered feedback</li>
+                                        <li><i class="fas fa-star text-warning me-2"></i>STAR method analysis</li>
+                                        <li><i class="fas fa-chart-line text-info me-2"></i>Performance scoring</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-clipboard-list text-primary me-2"></i>Question Types</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-users text-purple me-2"></i>Behavioral Questions</li>
+                                        <li><i class="fas fa-cogs text-success me-2"></i>Technical Questions</li>
+                                        <li><i class="fas fa-lightbulb text-warning me-2"></i>Problem-solving</li>
+                                        <li><i class="fas fa-handshake text-info me-2"></i>Situational Judgment</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <label for="interviewType" class="form-label"><strong>Interview Type</strong></label>
+                                    <select class="form-select" id="interviewType">
+                                        <option value="mixed">Mixed (Recommended)</option>
+                                        <option value="behavioral">Behavioral Focus</option>
+                                        <option value="technical">Technical Focus</option>
+                                        <option value="leadership">Leadership & Management</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="duration" class="form-label"><strong>Duration</strong></label>
+                                    <select class="form-select" id="duration">
+                                        <option value="15">15 minutes (3-4 questions)</option>
+                                        <option value="30" selected>30 minutes (6-7 questions)</option>
+                                        <option value="45">45 minutes (8-10 questions)</option>
+                                        <option value="60">60 minutes (12+ questions)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="difficulty" class="form-label"><strong>Difficulty Level</strong></label>
+                                    <select class="form-select" id="difficulty">
+                                        <option value="beginner">Beginner</option>
+                                        <option value="intermediate" selected>Intermediate</option>
+                                        <option value="advanced">Advanced</option>
+                                        <option value="expert">Expert</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Microphone Test -->
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-microphone-alt me-2"></i>Microphone Test</h6>
+                                <p class="mb-3">Test your microphone before starting the interview</p>
+                                <div class="d-flex align-items-center">
+                                    <button class="btn btn-outline-primary me-3" id="mic-test-btn" onclick="testMicrophone()">
+                                        <i class="fas fa-microphone me-2"></i>Test Microphone
+                                    </button>
+                                    <div id="mic-status" class="text-muted">Click to test your microphone</div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-warning">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Interview Tips:</h6>
+                                <ul class="mb-0">
+                                    <li>Use the STAR method for behavioral questions (Situation, Task, Action, Result)</li>
+                                    <li>Speak clearly and at a moderate pace</li>
+                                    <li>Take time to think before responding</li>
+                                    <li>Provide specific examples from your experience</li>
+                                    <li>Ask clarifying questions if needed</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-center">
+                                <button class="btn btn-success btn-lg px-5" onclick="startInterview()">
+                                    <i class="fas fa-play me-2"></i>Start Mock Interview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interview Interface -->
+        <div id="interview-section" style="display: none;">
+            <div class="row">
+                <!-- Question Panel -->
+                <div class="col-lg-8">
+                    <div class="card interview-card question-card mb-4">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-question-circle me-2"></i>
+                                    Question <span id="question-number">1</span> of <span id="total-questions">7</span>
+                                </h5>
+                                <span class="badge bg-light text-dark" id="question-type">Behavioral</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h4 id="question-text" class="mb-4">Loading question...</h4>
+                            <div id="question-hints" class="alert alert-light">
+                                <small id="question-hint-text">Think about a specific example and use the STAR method.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Area -->
+                    <div class="card interview-card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-comment me-2"></i>Your Response
+                                </h5>
+                                <div class="d-flex align-items-center" id="recording-status" style="display: none;">
+                                    <div class="recording-indicator me-2"></div>
+                                    <span class="text-danger">Recording...</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <textarea 
+                                class="form-control response-area mb-3" 
+                                id="response-text"
+                                placeholder="You can type your response here, or use voice recording..."
+                                rows="8"
+                            ></textarea>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <button class="btn btn-outline-primary me-2" id="record-btn" onclick="toggleRecording()">
+                                        <i class="fas fa-microphone me-2"></i>Start Recording
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="clearResponse()">
+                                        <i class="fas fa-trash me-2"></i>Clear
+                                    </button>
+                                </div>
+                                <div>
+                                    <span class="text-muted me-3" id="word-count">0 words</span>
+                                    <button class="btn btn-success" onclick="submitResponse()" id="submit-response-btn" disabled>
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Response
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer and Progress Panel -->
+                <div class="col-lg-4">
+                    <div class="card interview-card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-clock me-2"></i>Time Remaining</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="timer-display mb-3" id="timer">05:00</div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <small class="text-muted">Interview Progress</small>
+                        </div>
+                    </div>
+
+                    <!-- STAR Method Guide -->
+                    <div class="card interview-card mb-4">
+                        <div class="card-header bg-warning">
+                            <h6><i class="fas fa-star me-2"></i>STAR Method Guide</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <div class="star-method-indicator star-complete">S</div>
+                                <strong>Situation:</strong> Set the context
+                            </div>
+                            <div class="mb-2">
+                                <div class="star-method-indicator star-complete">T</div>
+                                <strong>Task:</strong> Describe your responsibility
+                            </div>
+                            <div class="mb-2">
+                                <div class="star-method-indicator star-complete">A</div>
+                                <strong>Action:</strong> Explain what you did
+                            </div>
+                            <div class="mb-0">
+                                <div class="star-method-indicator star-complete">R</div>
+                                <strong>Result:</strong> Share the outcome
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="card interview-card">
+                        <div class="card-body">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-outline-secondary" id="prev-question-btn" onclick="previousQuestion()" disabled>
+                                    <i class="fas fa-arrow-left me-2"></i>Previous Question
+                                </button>
+                                <button class="btn btn-primary" id="next-question-btn" onclick="nextQuestion()" disabled>
+                                    Next Question<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                <button class="btn btn-success" id="finish-interview-btn" onclick="finishInterview()" style="display: none;">
+                                    <i class="fas fa-flag-checkered me-2"></i>Finish Interview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card interview-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h2><i class="fas fa-award me-2"></i>Interview Performance Report</h2>
+                        </div>
+                        <div class="card-body" id="results-content">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentQuestion = 0;
+        let questions = [];
+        let responses = {};
+        let timer = null;
+        let questionTimer = null;
+        let timeRemaining = 1800; // 30 minutes default
+        let questionTimeLimit = 300; // 5 minutes per question
+        let sessionId = '';
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+
+        function testMicrophone() {
+            const btn = document.getElementById('mic-test-btn');
+            const status = document.getElementById('mic-status');
+            
+            btn.disabled = true;
+            status.textContent = 'Testing microphone...';
+            
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    status.innerHTML = '<i class="fas fa-check text-success me-2"></i>Microphone working properly!';
+                    stream.getTracks().forEach(track => track.stop());
+                    btn.disabled = false;
+                })
+                .catch(error => {
+                    status.innerHTML = '<i class="fas fa-times text-danger me-2"></i>Microphone access denied or not available';
+                    btn.disabled = false;
+                });
+        }
+
+        function startInterview() {
+            const interviewType = document.getElementById('interviewType').value;
+            const duration = parseInt(document.getElementById('duration').value);
+            const difficulty = document.getElementById('difficulty').value;
+
+            fetch('/start-mock-interview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    interview_type: interviewType,
+                    duration_minutes: duration,
+                    difficulty: difficulty
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    questions = data.session.questions;
+                    sessionId = data.session.session_id;
+                    timeRemaining = duration * 60;
+                    setupInterview();
+                } else {
+                    alert('Error starting interview: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start interview. Please try again.');
+            });
+        }
+
+        function setupInterview() {
+            document.getElementById('setup-section').style.display = 'none';
+            document.getElementById('interview-section').style.display = 'block';
+            
+            document.getElementById('total-questions').textContent = questions.length;
+            loadQuestion(0);
+            startTimer();
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const question = questions[index];
+            
+            document.getElementById('question-number').textContent = index + 1;
+            document.getElementById('question-type').textContent = question.type || 'General';
+            document.getElementById('question-text').textContent = question.question;
+            
+            // Set question hint
+            const hint = question.type === 'behavioral' ? 
+                'Think about a specific example and use the STAR method.' :
+                'Consider the technical concepts and provide a clear explanation.';
+            document.getElementById('question-hint-text').textContent = hint;
+            
+            // Clear previous response
+            document.getElementById('response-text').value = responses[index] || '';
+            updateWordCount();
+            
+            // Update navigation
+            document.getElementById('prev-question-btn').disabled = index === 0;
+            document.getElementById('next-question-btn').style.display = index === questions.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('finish-interview-btn').style.display = index === questions.length - 1 ? 'inline-block' : 'none';
+            
+            // Update progress
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            // Start question timer
+            startQuestionTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    finishInterview();
+                }
+            }, 1000);
+        }
+
+        function startQuestionTimer() {
+            questionTimeLimit = questions[currentQuestion].time_limit || 300;
+            
+            questionTimer = setInterval(() => {
+                questionTimeLimit--;
+                
+                if (questionTimeLimit <= 60) {
+                    document.getElementById('timer').classList.add('timer-warning');
+                }
+                
+                if (questionTimeLimit <= 0) {
+                    clearInterval(questionTimer);
+                    // Auto-submit or move to next question
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    } else {
+                        finishInterview();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            const status = document.getElementById('recording-status');
+            
+            if (!isRecording) {
+                startRecording();
+                btn.innerHTML = '<i class="fas fa-stop me-2"></i>Stop Recording';
+                btn.className = 'btn btn-danger me-2';
+                status.style.display = 'flex';
+                isRecording = true;
+            } else {
+                stopRecording();
+                btn.innerHTML = '<i class="fas fa-microphone me-2"></i>Start Recording';
+                btn.className = 'btn btn-outline-primary me-2';
+                status.style.display = 'none';
+                isRecording = false;
+            }
+        }
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        // Here you would typically send the audio to a speech-to-text service
+                        // For now, we'll just show a placeholder
+                        const responseText = document.getElementById('response-text');
+                        if (!responseText.value.trim()) {
+                            responseText.value = '[Voice recording captured - would be transcribed in full implementation]';
+                            updateWordCount();
+                        }
+                    };
+                    
+                    mediaRecorder.start();
+                })
+                .catch(error => {
+                    console.error('Error accessing microphone:', error);
+                    alert('Unable to access microphone. Please check permissions.');
+                });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        function clearResponse() {
+            document.getElementById('response-text').value = '';
+            updateWordCount();
+        }
+
+        function updateWordCount() {
+            const text = document.getElementById('response-text').value;
+            const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+            document.getElementById('word-count').textContent = wordCount + ' words';
+            
+            const submitBtn = document.getElementById('submit-response-btn');
+            submitBtn.disabled = wordCount < 10; // Minimum 10 words
+        }
+
+        // Update word count on typing
+        document.getElementById('response-text').addEventListener('input', updateWordCount);
+
+        function submitResponse() {
+            const response = document.getElementById('response-text').value.trim();
+            if (response.length < 10) {
+                alert('Please provide a more detailed response (minimum 10 words).');
+                return;
+            }
+            
+            responses[currentQuestion] = response;
+            
+            // Enable navigation
+            document.getElementById('next-question-btn').disabled = false;
+            document.getElementById('finish-interview-btn').disabled = false;
+            
+            // Show success feedback
+            const btn = document.getElementById('submit-response-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Submitted!';
+            btn.className = 'btn btn-success';
+            
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.className = 'btn btn-success';
+            }, 2000);
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                clearInterval(questionTimer);
+                loadQuestion(currentQuestion - 1);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                clearInterval(questionTimer);
+                loadQuestion(currentQuestion + 1);
+            }
+        }
+
+        function finishInterview() {
+            clearInterval(timer);
+            clearInterval(questionTimer);
+            
+            if (isRecording) {
+                toggleRecording();
+            }
+            
+            // Prepare interview data
+            const interviewData = {
+                session_id: sessionId,
+                questions: questions,
+                responses: responses,
+                duration_minutes: Math.floor((1800 - timeRemaining) / 60)
+            };
+
+            fetch('/submit-mock-interview', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(interviewData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResults(data.evaluation);
+                } else {
+                    alert('Error processing interview: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to process interview results. Please try again.');
+            });
+        }
+
+        function showResults(evaluation) {
+            document.getElementById('interview-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = `
+                <div class="row text-center mb-4">
+                    <div class="col-md-3">
+                        <div class="score-badge bg-primary text-white">
+                            ${evaluation.overall_score || 82}%
+                        </div>
+                        <p class="mt-2">Overall Performance</p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="score-badge bg-success text-white">
+                            ${evaluation.communication_score || 85}%
+                        </div>
+                        <p class="mt-2">Communication</p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="score-badge bg-info text-white">
+                            ${evaluation.content_score || 80}%
+                        </div>
+                        <p class="mt-2">Content Quality</p>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="score-badge bg-warning text-white">
+                            ${evaluation.star_usage || 75}%
+                        </div>
+                        <p class="mt-2">STAR Method Usage</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="feedback-section">
+                            <h5><i class="fas fa-thumbs-up text-success me-2"></i>Strengths</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i>Clear communication style</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Relevant examples provided</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Good time management</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feedback-section">
+                            <h5><i class="fas fa-chart-line text-primary me-2"></i>Areas for Improvement</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-arrow-up text-primary me-2"></i>More detailed examples</li>
+                                <li><i class="fas fa-arrow-up text-primary me-2"></i>Better STAR structure</li>
+                                <li><i class="fas fa-arrow-up text-primary me-2"></i>Confidence in delivery</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-lightbulb me-2"></i>Personalized Recommendations</h6>
+                    <p class="mb-0">Practice using the STAR method more consistently, especially for behavioral questions. Consider practicing with a friend or recording yourself to improve confidence and delivery.</p>
+                </div>
+                
+                <div class="text-center">
+                    <a href="/student/dashboard" class="btn btn-primary me-3">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                    <button class="btn btn-outline-primary me-3" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Report
+                    </button>
+                    <button class="btn btn-success" onclick="location.reload()">
+                        <i class="fas fa-redo me-2"></i>Take Another Interview
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

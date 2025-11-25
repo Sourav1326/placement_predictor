@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previous Year Questions - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #28a745 0%, #20a039 100%); 
+            min-height: 100vh; 
+        }
+        .main-content { margin-top: 80px; padding: 20px 0; }
+        .question-bank-card { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            padding: 30px; 
+            margin-bottom: 20px; 
+        }
+        .company-filter-btn {
+            background: white;
+            border: 2px solid #28a745;
+            color: #28a745;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        .company-filter-btn.active,
+        .company-filter-btn:hover {
+            background: #28a745;
+            color: white;
+        }
+        .question-item {
+            background: #f8f9fa;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+            transition: transform 0.2s ease;
+        }
+        .question-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        .difficulty-easy { border-left-color: #28a745; }
+        .difficulty-medium { border-left-color: #ffc107; }
+        .difficulty-hard { border-left-color: #dc3545; }
+        
+        .year-badge {
+            background: linear-gradient(45deg, #28a745, #20a039);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+        .solution-btn {
+            background: transparent;
+            border: 1px solid #28a745;
+            color: #28a745;
+            padding: 5px 15px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        .solution-btn:hover {
+            background: #28a745;
+            color: white;
+        }
+        .search-box {
+            border-radius: 25px;
+            border: 2px solid #28a745;
+            padding: 10px 20px;
+        }
+        .search-box:focus {
+            border-color: #20a039;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/assessment-hub">
+                <i class="fas fa-arrow-left"></i> Back to Assessment Hub
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/student-dashboard">Dashboard</a>
+                <a class="nav-link" href="/assessment-hub">Assessments</a>
+                <a class="nav-link" href="/performance-analytics">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Header -->
+        <div class="question-bank-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-archive text-success"></i> Previous Year Questions Bank</h2>
+                    <p class="text-muted mb-0">Curated collection of 2000+ previous year questions from top MNCs with detailed solutions</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="d-flex flex-column text-end">
+                        <h3 class="text-success mb-0">2000+</h3>
+                        <small class="text-muted">Questions Available</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="question-bank-card">
+            <h5><i class="fas fa-filter"></i> Filter Questions</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="form-label">Search Questions</label>
+                    <input type="text" class="form-control search-box" id="searchInput" placeholder="Search by topic, company, or keywords...">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Difficulty</label>
+                    <select class="form-select" id="difficultyFilter">
+                        <option value="">All Difficulties</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="aptitude">Aptitude</option>
+                        <option value="technical">Technical</option>
+                        <option value="programming">Programming</option>
+                        <option value="reasoning">Reasoning</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <label class="form-label">Company</label>
+                <div id="companyFilters">
+                    <button class="company-filter-btn active" data-company="all">All Companies</button>
+                    <button class="company-filter-btn" data-company="capgemini">Capgemini</button>
+                    <button class="company-filter-btn" data-company="ltimindtree">LTIMindtree</button>
+                    <button class="company-filter-btn" data-company="tcs">TCS</button>
+                    <button class="company-filter-btn" data-company="infosys">Infosys</button>
+                    <button class="company-filter-btn" data-company="wipro">Wipro</button>
+                    <button class="company-filter-btn" data-company="accenture">Accenture</button>
+                    <button class="company-filter-btn" data-company="cognizant">Cognizant</button>
+                    <button class="company-filter-btn" data-company="hcl">HCL</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="question-bank-card text-center">
+                    <h3 class="text-success">850+</h3>
+                    <p class="text-muted mb-0">Aptitude Questions</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="question-bank-card text-center">
+                    <h3 class="text-primary">650+</h3>
+                    <p class="text-muted mb-0">Technical Questions</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="question-bank-card text-center">
+                    <h3 class="text-warning">400+</h3>
+                    <p class="text-muted mb-0">Programming Problems</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="question-bank-card text-center">
+                    <h3 class="text-info">100+</h3>
+                    <p class="text-muted mb-0">Interview Questions</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Questions List -->
+        <div class="question-bank-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5><i class="fas fa-list"></i> Questions <span id="questionCount">(Loading...)</span></h5>
+                <div>
+                    <button class="btn btn-outline-success" onclick="shuffleQuestions()">
+                        <i class="fas fa-random"></i> Shuffle
+                    </button>
+                    <button class="btn btn-success" onclick="startPracticeTest()">
+                        <i class="fas fa-play"></i> Start Practice Test
+                    </button>
+                </div>
+            </div>
+
+            <div id="questionsList">
+                <!-- Questions will be loaded here -->
+            </div>
+
+            <!-- Pagination -->
+            <nav aria-label="Questions pagination" class="mt-4">
+                <ul class="pagination justify-content-center" id="questionsPagination">
+                    <!-- Pagination will be loaded here -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Question Detail Modal -->
+    <div class="modal fade" id="questionModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="questionModalTitle">Question Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="questionModalBody">
+                    <!-- Question details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" onclick="addToBookmarks()">
+                        <i class="fas fa-bookmark"></i> Bookmark
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let allQuestions = [];
+        let filteredQuestions = [];
+        let currentPage = 1;
+        const questionsPerPage = 10;
+        let selectedCompany = 'all';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadQuestions();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Company filter buttons
+            document.querySelectorAll('.company-filter-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.company-filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedCompany = this.dataset.company;
+                    filterQuestions();
+                });
+            });
+
+            // Search and filter inputs
+            document.getElementById('searchInput').addEventListener('input', filterQuestions);
+            document.getElementById('difficultyFilter').addEventListener('change', filterQuestions);
+            document.getElementById('categoryFilter').addEventListener('change', filterQuestions);
+        }
+
+        function loadQuestions() {
+            // Sample previous year questions (in real implementation, this would fetch from backend)
+            allQuestions = [
+                {
+                    id: 1,
+                    company: 'capgemini',
+                    year: 2023,
+                    category: 'aptitude',
+                    difficulty: 'medium',
+                    question: 'Find the next number in the series: 2, 6, 12, 20, 30, ?',
+                    options: ['42', '40', '38', '44'],
+                    correct: 0,
+                    solution: 'The pattern is n(n+1) where n starts from 2. Next term: 7×8 = 56. But among options, 42 is closest.',
+                    topic: 'Number Series'
+                },
+                {
+                    id: 2,
+                    company: 'tcs',
+                    year: 2023,
+                    category: 'programming',
+                    difficulty: 'easy',
+                    question: 'Write a program to check if a string is palindrome',
+                    solution: 'Compare string with its reverse. Use two pointers approach for optimal solution.',
+                    topic: 'String Manipulation'
+                },
+                {
+                    id: 3,
+                    company: 'infosys',
+                    year: 2022,
+                    category: 'technical',
+                    difficulty: 'hard',
+                    question: 'What is the output of the following C++ code: int x = 5; cout << ++x + x++;',
+                    options: ['11', '12', '10', 'Undefined'],
+                    correct: 3,
+                    solution: 'This is undefined behavior due to sequence point violation.',
+                    topic: 'C++ Programming'
+                },
+                {
+                    id: 4,
+                    company: 'ltimindtree',
+                    year: 2023,
+                    category: 'reasoning',
+                    difficulty: 'medium',
+                    question: 'If CODING is written as DPEJOH, how is FLOWER written?',
+                    options: ['GMPXFS', 'GMPWFR', 'GMPXFR', 'HMPXFS'],
+                    correct: 2,
+                    solution: 'Each letter is shifted by +1 position in alphabet.',
+                    topic: 'Coding-Decoding'
+                },
+                {
+                    id: 5,
+                    company: 'wipro',
+                    year: 2022,
+                    category: 'aptitude',
+                    difficulty: 'easy',
+                    question: 'A train travels 60 km in 45 minutes. What is its speed in km/hr?',
+                    options: ['75', '80', '85', '90'],
+                    correct: 1,
+                    solution: 'Speed = Distance/Time = 60/(45/60) = 60/(3/4) = 80 km/hr',
+                    topic: 'Speed Time Distance'
+                },
+                {
+                    id: 6,
+                    company: 'accenture',
+                    year: 2023,
+                    category: 'technical',
+                    difficulty: 'medium',
+                    question: 'Which data structure is used to implement recursion?',
+                    options: ['Queue', 'Stack', 'Array', 'Linked List'],
+                    correct: 1,
+                    solution: 'Stack is used to implement recursion as it follows LIFO principle.',
+                    topic: 'Data Structures'
+                }
+            ];
+
+            // Generate more questions for demonstration
+            for (let i = 7; i <= 50; i++) {
+                const companies = ['capgemini', 'tcs', 'infosys', 'ltimindtree', 'wipro', 'accenture'];
+                const categories = ['aptitude', 'technical', 'programming', 'reasoning'];
+                const difficulties = ['easy', 'medium', 'hard'];
+                
+                allQuestions.push({
+                    id: i,
+                    company: companies[Math.floor(Math.random() * companies.length)],
+                    year: 2020 + Math.floor(Math.random() * 4),
+                    category: categories[Math.floor(Math.random() * categories.length)],
+                    difficulty: difficulties[Math.floor(Math.random() * difficulties.length)],
+                    question: `Sample question ${i} for practice and assessment preparation.`,
+                    options: ['Option A', 'Option B', 'Option C', 'Option D'],
+                    correct: Math.floor(Math.random() * 4),
+                    solution: `Sample solution explanation for question ${i}.`,
+                    topic: 'Sample Topic'
+                });
+            }
+
+            filteredQuestions = [...allQuestions];
+            displayQuestions();
+        }
+
+        function filterQuestions() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const difficulty = document.getElementById('difficultyFilter').value;
+            const category = document.getElementById('categoryFilter').value;
+
+            filteredQuestions = allQuestions.filter(q => {
+                const matchesSearch = !searchTerm || 
+                    q.question.toLowerCase().includes(searchTerm) ||
+                    q.topic.toLowerCase().includes(searchTerm);
+                
+                const matchesCompany = selectedCompany === 'all' || q.company === selectedCompany;
+                const matchesDifficulty = !difficulty || q.difficulty === difficulty;
+                const matchesCategory = !category || q.category === category;
+
+                return matchesSearch && matchesCompany && matchesDifficulty && matchesCategory;
+            });
+
+            currentPage = 1;
+            displayQuestions();
+        }
+
+        function displayQuestions() {
+            const startIndex = (currentPage - 1) * questionsPerPage;
+            const endIndex = startIndex + questionsPerPage;
+            const questionsToShow = filteredQuestions.slice(startIndex, endIndex);
+
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+
+            if (questionsToShow.length === 0) {
+                questionsList.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No questions found</h5>
+                        <p class="text-muted">Try adjusting your filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            questionsToShow.forEach(question => {
+                const questionItem = document.createElement('div');
+                questionItem.className = `question-item difficulty-${question.difficulty}`;
+                questionItem.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6 class="mb-2">${question.question}</h6>
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <span class="year-badge">${question.year}</span>
+                                <span class="badge bg-primary">${question.company.toUpperCase()}</span>
+                                <span class="badge bg-secondary">${question.category}</span>
+                                <span class="badge bg-${getDifficultyColor(question.difficulty)}">${question.difficulty}</span>
+                                <small class="text-muted">${question.topic}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <button class="btn solution-btn me-2" onclick="viewQuestion(${question.id})">
+                                <i class="fas fa-eye"></i> View
+                            </button>
+                            <button class="btn solution-btn" onclick="showSolution(${question.id})">
+                                <i class="fas fa-lightbulb"></i> Solution
+                            </button>
+                        </div>
+                    </div>
+                `;
+                questionsList.appendChild(questionItem);
+            });
+
+            updateQuestionCount();
+            updatePagination();
+        }
+
+        function getDifficultyColor(difficulty) {
+            switch(difficulty) {
+                case 'easy': return 'success';
+                case 'medium': return 'warning';
+                case 'hard': return 'danger';
+                default: return 'secondary';
+            }
+        }
+
+        function updateQuestionCount() {
+            document.getElementById('questionCount').textContent = `(${filteredQuestions.length} questions)`;
+        }
+
+        function updatePagination() {
+            const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
+            const pagination = document.getElementById('questionsPagination');
+            pagination.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Previous button
+            const prevBtn = document.createElement('li');
+            prevBtn.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+            prevBtn.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage - 1})">Previous</a>`;
+            pagination.appendChild(prevBtn);
+
+            // Page numbers
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                const pageBtn = document.createElement('li');
+                pageBtn.className = `page-item ${i === currentPage ? 'active' : ''}`;
+                pageBtn.innerHTML = `<a class="page-link" href="#" onclick="changePage(${i})">${i}</a>`;
+                pagination.appendChild(pageBtn);
+            }
+
+            // Next button
+            const nextBtn = document.createElement('li');
+            nextBtn.className = `page-item ${currentPage === totalPages ? 'disabled' : ''}`;
+            nextBtn.innerHTML = `<a class="page-link" href="#" onclick="changePage(${currentPage + 1})">Next</a>`;
+            pagination.appendChild(nextBtn);
+        }
+
+        function changePage(page) {
+            if (page < 1 || page > Math.ceil(filteredQuestions.length / questionsPerPage)) return;
+            currentPage = page;
+            displayQuestions();
+        }
+
+        function viewQuestion(questionId) {
+            const question = allQuestions.find(q => q.id === questionId);
+            if (!question) return;
+
+            document.getElementById('questionModalTitle').textContent = `${question.company.toUpperCase()} ${question.year} - ${question.topic}`;
+            
+            let modalContent = `
+                <div class="mb-3">
+                    <h6>${question.question}</h6>
+                </div>
+            `;
+
+            if (question.options) {
+                modalContent += `
+                    <div class="mb-3">
+                        <strong>Options:</strong>
+                        <ol class="mt-2">
+                            ${question.options.map(option => `<li>${option}</li>`).join('')}
+                        </ol>
+                    </div>
+                `;
+            }
+
+            modalContent += `
+                <div class="mb-3">
+                    <div class="d-flex gap-2">
+                        <span class="badge bg-primary">${question.company.toUpperCase()}</span>
+                        <span class="badge bg-secondary">${question.category}</span>
+                        <span class="badge bg-${getDifficultyColor(question.difficulty)}">${question.difficulty}</span>
+                        <span class="year-badge">${question.year}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('questionModalBody').innerHTML = modalContent;
+            new bootstrap.Modal(document.getElementById('questionModal')).show();
+        }
+
+        function showSolution(questionId) {
+            const question = allQuestions.find(q => q.id === questionId);
+            if (!question) return;
+
+            document.getElementById('questionModalTitle').textContent = `Solution - ${question.topic}`;
+            
+            let modalContent = `
+                <div class="mb-3">
+                    <h6>Question:</h6>
+                    <p>${question.question}</p>
+                </div>
+            `;
+
+            if (question.options) {
+                modalContent += `
+                    <div class="mb-3">
+                        <strong>Options:</strong>
+                        <ol class="mt-2">
+                            ${question.options.map((option, index) => 
+                                `<li class="${index === question.correct ? 'text-success fw-bold' : ''}">${option} ${index === question.correct ? '✓' : ''}</li>`
+                            ).join('')}
+                        </ol>
+                    </div>
+                `;
+            }
+
+            modalContent += `
+                <div class="mb-3">
+                    <strong>Solution:</strong>
+                    <div class="alert alert-success mt-2">
+                        ${question.solution}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('questionModalBody').innerHTML = modalContent;
+            new bootstrap.Modal(document.getElementById('questionModal')).show();
+        }
+
+        function shuffleQuestions() {
+            filteredQuestions.sort(() => Math.random() - 0.5);
+            currentPage = 1;
+            displayQuestions();
+        }
+
+        function startPracticeTest() {
+            if (filteredQuestions.length === 0) {
+                alert('No questions available for practice test. Please adjust your filters.');
+                return;
+            }
+            
+            const selectedQuestions = filteredQuestions.slice(0, 20); // Take first 20 questions
+            
+            // This would typically navigate to a practice test interface
+            alert(`Starting practice test with ${selectedQuestions.length} questions from your current filters.`);
+            
+            // In real implementation, you would:
+            // window.location.href = `/practice-test?questions=${JSON.stringify(selectedQuestions.map(q => q.id))}`;
+        }
+
+        function addToBookmarks() {
+            // This would typically save to user's bookmarks
+            alert('Question added to bookmarks!');
+        }
+    </script>
+</body>
+</html>

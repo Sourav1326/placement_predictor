@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placement Prediction - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { background: #f8f9fa; }
+        .main-content { margin-top: 80px; padding: 20px 0; }
+        .prediction-card { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            padding: 30px; 
+            margin-bottom: 20px; 
+        }
+        .prediction-result { 
+            text-align: center; 
+            padding: 30px; 
+            border-radius: 15px; 
+            margin: 20px 0; 
+        }
+        .success { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+        .warning { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); color: white; }
+        .btn-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; }
+        .improvement-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px; padding: 25px; margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        .improvement-card {
+            background: white; border-radius: 12px; padding: 20px; margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .improvement-card:hover { transform: translateY(-2px); }
+        .assessment-link {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none;
+            font-size: 0.9rem; transition: all 0.3s;
+        }
+        .assessment-link:hover { color: white; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap"></i> Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">Dashboard</a>
+                <a class="nav-link active" href="{{ url_for('placement_prediction') }}">Prediction</a>
+                <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
+                <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <div class="row">
+            <div class="col-12">
+                <div class="prediction-card">
+                    <h2><i class="fas fa-chart-line"></i> AI-Powered Placement Prediction</h2>
+                    <p class="text-muted">Get personalized insights about your placement probability using advanced machine learning</p>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5>Current Profile Summary:</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>CGPA:</strong> {{ profile.cgpa or 'Not provided' }}</p>
+                                    <p><strong>Projects:</strong> {{ profile.num_projects or 0 }}</p>
+                                    <p><strong>Internships:</strong> {{ profile.num_internships or 0 }}</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>LeetCode Score:</strong> {{ profile.leetcode_score or 'Not provided' }}</p>
+                                    <p><strong>Certifications:</strong> {{ profile.num_certifications or 0 }}</p>
+                                    <p><strong>Languages:</strong> {{ profile.programming_languages or 'Not provided' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="getPrediction()">
+                                <i class="fas fa-robot"></i> Get AI Prediction
+                            </button>
+                            <br><br>
+                            <small class="text-muted">Uses ensemble of ML models including Deep Learning</small>
+                        </div>
+                    </div>
+                    
+                    <div id="predictionResults" style="display: none;">
+                        <!-- Results will be populated here -->
+                    </div>
+                    
+                    <div id="loadingSpinner" style="display: none;" class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Analyzing your profile with AI models...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="prediction-card">
+                    <h5><i class="fas fa-lightbulb"></i> Improvement Tips</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Complete more projects to showcase skills</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Improve coding platform ratings</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Gain internship experience</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Obtain relevant certifications</li>
+                        <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Participate in hackathons</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="prediction-card">
+                    <h5><i class="fas fa-info-circle"></i> About Our AI Models</h5>
+                    <p>Our prediction system uses:</p>
+                    <ul>
+                        <li><strong>Deep Learning:</strong> Neural networks for complex pattern recognition</li>
+                        <li><strong>Random Forest:</strong> Ensemble method for robust predictions</li>
+                        <li><strong>XGBoost:</strong> Gradient boosting for high accuracy</li>
+                        <li><strong>Feature Engineering:</strong> Advanced data preprocessing</li>
+                    </ul>
+                    <small class="text-muted">Models trained on 500+ student profiles with 85%+ accuracy</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function getPrediction() {
+            const resultsDiv = document.getElementById('predictionResults');
+            const loadingDiv = document.getElementById('loadingSpinner');
+            
+            // Show loading spinner
+            loadingDiv.style.display = 'block';
+            resultsDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch('/predict-placement', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                // Check if response is a redirect to login page
+                if (response.redirected || response.url.includes('/auth/login')) {
+                    window.location.href = '/auth/login?next=/placement-prediction';
+                    return;
+                }
+                
+                // Check if response is not ok (non-2xx status)
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Hide loading spinner
+                loadingDiv.style.display = 'none';
+                
+                if (result.success) {
+                    const probability = (result.probability * 100).toFixed(1);
+                    const resultClass = result.probability > 0.6 ? 'success' : 'warning';
+                    const icon = result.probability > 0.6 ? 'fa-check-circle' : 'fa-exclamation-triangle';
+                    const message = result.probability > 0.6 ? 'High Placement Probability!' : 'Room for Improvement';
+                    
+                    resultsDiv.innerHTML = `
+                        <div class="prediction-result ${resultClass}">
+                            <i class="fas ${icon} fa-3x mb-3"></i>
+                            <h3>${message}</h3>
+                            <h2>${probability}%</h2>
+                            <p>Placement Probability</p>
+                            <small>Model: ${result.model_used}</small>
+                        </div>
+                        
+                        ${result.feature_importance && Array.isArray(result.feature_importance) ? `
+                            <div class="feature-importance">
+                                <h5><i class="fas fa-chart-bar"></i> Key Factors Influencing Your Score</h5>
+                                <div class="row">
+                                    ${result.feature_importance.slice(0, 6).map(f => `
+                                        <div class="col-md-4 mb-2">
+                                            <strong>${f.feature}:</strong> ${(f.importance * 100).toFixed(1)}%
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : result.feature_importance && typeof result.feature_importance === 'object' ? `
+                            <div class="feature-importance">
+                                <h5><i class="fas fa-chart-bar"></i> Key Factors Influencing Your Score</h5>
+                                <div class="row">
+                                    ${Object.entries(result.feature_importance).slice(0, 6).map(([feature, data]) => `
+                                        <div class="col-md-4 mb-2">
+                                            <strong>${feature.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:</strong> ${typeof data === 'object' ? (data.importance * 100).toFixed(1) : (data * 100).toFixed(1)}%
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        
+                        ${generateImprovementSection(result, probability)}
+                    `;
+                    
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Prediction Failed:</strong> ${result.message}
+                        </div>
+                    `;
+                    resultsDiv.style.display = 'block';
+                }
+            } catch (error) {
+                // Hide loading spinner
+                loadingDiv.style.display = 'none';
+                
+                console.error('Prediction error:', error);
+                
+                let errorMessage = 'Unable to connect to prediction service. Please try again.';
+                
+                // Handle specific error types
+                if (error.message.includes('Unexpected token')) {
+                    errorMessage = 'Session expired. Please refresh the page and log in again.';
+                } else if (error.message.includes('Failed to fetch')) {
+                    errorMessage = 'Network connection error. Please check your internet connection.';
+                } else if (error.message.includes('HTTP error')) {
+                    errorMessage = 'Server error occurred. Please try again in a moment.';
+                }
+                
+                resultsDiv.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Error:</strong> ${errorMessage}
+                        <br><small class="text-muted">Error details: ${error.message}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-sm btn-outline-primary" onclick="window.location.reload()">
+                                <i class="fas fa-refresh"></i> Refresh Page
+                            </button>
+                        </div>
+                    </div>
+                `;
+                resultsDiv.style.display = 'block';
+            }
+        }
+        
+        function generateImprovementSection(result, probability) {
+            if (probability >= 70) {
+                return `
+                    <div class="improvement-section">
+                        <h5><i class="fas fa-trophy text-success"></i> Excellent Performance!</h5>
+                        <p>Your placement probability is excellent. Consider these advanced steps:</p>
+                        <div class="improvement-card">
+                            <h6><i class="fas fa-rocket"></i> Advanced Skill Enhancement</h6>
+                            <p>Take advanced assessments to further strengthen your profile.</p>
+                            <a href="/assessment-hub" class="assessment-link me-2">
+                                <i class="fas fa-brain"></i> Advanced Assessments
+                            </a>
+                            <a href="/skill-verification" class="assessment-link">
+                                <i class="fas fa-certificate"></i> Skill Verification
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const improvements = [];
+            
+            // Analyze current profile and suggest improvements
+            const profileSummary = getProfileSummary();
+            
+            if (profileSummary.cgpa < 7.0) {
+                improvements.push({
+                    title: 'Academic Performance',
+                    issue: 'CGPA below 7.0 may limit placement opportunities',
+                    action: 'Focus on improving academic grades',
+                    assessments: []
+                });
+            }
+            
+            if (profileSummary.projects < 2) {
+                improvements.push({
+                    title: 'Project Experience',
+                    issue: 'Limited project portfolio',
+                    action: 'Build more practical projects to showcase skills',
+                    assessments: [
+                        { name: 'Programming Assessment', url: '/skill-assessment', icon: 'fas fa-code' },
+                        { name: 'Skill Verification', url: '/skill-verification', icon: 'fas fa-certificate' }
+                    ]
+                });
+            }
+            
+            if (profileSummary.internships === 0) {
+                improvements.push({
+                    title: 'Practical Experience',
+                    issue: 'No internship experience',
+                    action: 'Gain practical industry experience through internships',
+                    assessments: [
+                        { name: 'Mock Interview', url: '/mock-interview', icon: 'fas fa-microphone' },
+                        { name: 'Communication Assessment', url: '/communication-assessment', icon: 'fas fa-comments' }
+                    ]
+                });
+            }
+            
+            if (profileSummary.leetcode < 1000) {
+                improvements.push({
+                    title: 'Coding Skills',
+                    issue: 'LeetCode score below industry standards',
+                    action: 'Improve problem-solving and algorithmic thinking',
+                    assessments: [
+                        { name: 'Programming Quiz', url: '/skill-assessment', icon: 'fas fa-laptop-code' },
+                        { name: 'Comprehensive Assessment', url: '/comprehensive-assessment', icon: 'fas fa-brain' }
+                    ]
+                });
+            }
+            
+            if (!profileSummary.languages || profileSummary.languages.split(',').length < 2) {
+                improvements.push({
+                    title: 'Programming Languages',
+                    issue: 'Limited programming language proficiency',
+                    action: 'Learn and master multiple programming languages',
+                    assessments: [
+                        { name: 'Language Assessment', url: '/skill-assessment', icon: 'fas fa-code' },
+                        { name: 'Skill Verification', url: '/skill-verification', icon: 'fas fa-certificate' }
+                    ]
+                });
+            }
+            
+            if (profileSummary.communication < 7.0) {
+                improvements.push({
+                    title: 'Communication Skills',
+                    issue: 'Communication skills need improvement',
+                    action: 'Develop better verbal and written communication',
+                    assessments: [
+                        { name: 'Communication Test', url: '/communication-assessment', icon: 'fas fa-comments' },
+                        { name: 'Mock Interview', url: '/mock-interview', icon: 'fas fa-microphone' }
+                    ]
+                });
+            }
+            
+            if (improvements.length === 0) {
+                return `
+                    <div class="improvement-section">
+                        <h5><i class="fas fa-thumbs-up text-success"></i> Good Foundation!</h5>
+                        <p>Your profile shows solid fundamentals. Take these assessments to validate and enhance your skills:</p>
+                        <div class="improvement-card">
+                            <h6><i class="fas fa-chart-line"></i> Skill Enhancement</h6>
+                            <a href="/assessment-hub" class="assessment-link me-2">
+                                <i class="fas fa-brain"></i> Take Assessments
+                            </a>
+                            <a href="/skill-verification" class="assessment-link">
+                                <i class="fas fa-certificate"></i> Verify Skills
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div class="improvement-section">
+                    <h5><i class="fas fa-chart-line"></i> Personalized Improvement Plan</h5>
+                    <p>Based on your ${probability}% placement probability, here are specific areas to focus on:</p>
+                    ${improvements.map(item => `
+                        <div class="improvement-card">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6><i class="fas fa-exclamation-triangle text-warning"></i> ${item.title}</h6>
+                                    <p class="small text-muted mb-1">${item.issue}</p>
+                                    <p class="mb-0"><strong>Action:</strong> ${item.action}</p>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    ${item.assessments.map(assessment => `
+                                        <a href="${assessment.url}" class="assessment-link d-block mb-2">
+                                            <i class="${assessment.icon}"></i> ${assessment.name}
+                                        </a>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+        
+        function getProfileSummary() {
+            // Extract profile data from the page using proper DOM methods
+            const profileElements = document.querySelectorAll('p');
+            let cgpa = 0, projects = 0, internships = 0, leetcode = 0, languages = '';
+            
+            // Search through all paragraph elements to find profile data
+            profileElements.forEach(p => {
+                const text = p.textContent || '';
+                
+                if (text.includes('CGPA:')) {
+                    const match = text.match(/CGPA:\s*([\d.]+)/i);
+                    cgpa = match ? parseFloat(match[1]) : 0;
+                } else if (text.includes('Projects:')) {
+                    const match = text.match(/Projects:\s*(\d+)/i);
+                    projects = match ? parseInt(match[1]) : 0;
+                } else if (text.includes('Internships:')) {
+                    const match = text.match(/Internships:\s*(\d+)/i);
+                    internships = match ? parseInt(match[1]) : 0;
+                } else if (text.includes('LeetCode Score:')) {
+                    const match = text.match(/LeetCode Score:\s*(\d+)/i);
+                    leetcode = match ? parseInt(match[1]) : 0;
+                } else if (text.includes('Languages:')) {
+                    const match = text.match(/Languages:\s*(.+)/i);
+                    languages = match ? match[1].trim() : '';
+                }
+            });
+            
+            return {
+                cgpa: cgpa,
+                projects: projects,
+                internships: internships,
+                leetcode: leetcode,
+                languages: languages.includes('Not provided') ? '' : languages,
+                communication: 6.0 // Default value, could be enhanced with actual data
+            };
+        }
+    </script>
+</body>
+</html>

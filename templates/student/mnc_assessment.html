@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ company.title() }} Assessment - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .assessment-container { 
+            margin: 50px auto; 
+            max-width: 1000px; 
+            background: white; 
+            border-radius: 20px; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+            overflow: hidden;
+        }
+        .company-header {
+            padding: 30px;
+            color: white;
+            text-align: center;
+        }
+        .capgemini { background: linear-gradient(135deg, #0052CC 0%, #004499 100%); }
+        .ltimindtree { background: linear-gradient(135deg, #E31837 0%, #B01530 100%); }
+        .tcs { background: linear-gradient(135deg, #004A8F 0%, #003366 100%); }
+        .infosys { background: linear-gradient(135deg, #007CC3 0%, #005A8B 100%); }
+        .wipro { background: linear-gradient(135deg, #7B68EE 0%, #6A5ACD 100%); }
+        .accenture { background: linear-gradient(135deg, #A100FF 0%, #8E00E8 100%); }
+        
+        .assessment-config {
+            padding: 40px;
+        }
+        .section-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: transform 0.2s ease;
+        }
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .timer-display {
+            background: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .question-container {
+            display: none;
+            padding: 30px;
+        }
+        .question-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .option-btn {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            color: #495057;
+            padding: 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            text-align: left;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .option-btn:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+        .option-btn.selected {
+            background: #667eea;
+            border-color: #667eea;
+            color: white;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            border: none; 
+            border-radius: 25px; 
+            padding: 12px 30px; 
+            font-weight: 600;
+        }
+        .progress-indicator {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+        .section-tabs {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .tab-btn {
+            background: white;
+            border: 1px solid #e9ecef;
+            padding: 10px 20px;
+            margin: 0 5px;
+            border-radius: 20px;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+        .tab-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark" style="background: rgba(0,0,0,0.1);">
+        <div class="container">
+            <a class="navbar-brand" href="/assessment-hub">
+                <i class="fas fa-arrow-left"></i> Back to Assessment Hub
+            </a>
+            <div class="timer-display" id="globalTimer">
+                <i class="fas fa-clock"></i> <span id="timeRemaining">00:00</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="assessment-container">
+        <!-- Company Header -->
+        <div class="company-header {{ company.lower() }}">
+            <h1><i class="fas fa-building"></i> {{ company.title() }} Technical Assessment</h1>
+            <p class="mb-0">Complete assessment modeled after {{ company.title() }}'s actual recruitment process</p>
+        </div>
+
+        <!-- Assessment Configuration -->
+        <div class="assessment-config" id="configSection">
+            <h3><i class="fas fa-cog"></i> Assessment Structure</h3>
+            <p class="text-muted">This assessment is designed to mirror {{ company.title() }}'s actual technical evaluation process with previous year question patterns.</p>
+            
+            <div id="sectionsDisplay">
+                <!-- Sections will be loaded here -->
+            </div>
+
+            <div class="text-center mt-4">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Important Instructions:</strong>
+                    <ul class="mt-2 mb-0 text-start">
+                        <li>Read all questions carefully before answering</li>
+                        <li>You can navigate between sections during the test</li>
+                        <li>Time is tracked individually for each section</li>
+                        <li>Submit your assessment before time runs out</li>
+                        <li>Previous year questions are mixed throughout the assessment</li>
+                    </ul>
+                </div>
+                <button class="btn btn-primary btn-lg" onclick="startAssessment()">
+                    <i class="fas fa-play"></i> Start {{ company.title() }} Assessment
+                </button>
+            </div>
+        </div>
+
+        <!-- Section Tabs -->
+        <div class="section-tabs" id="sectionTabs" style="display: none;">
+            <!-- Tabs will be loaded here -->
+        </div>
+
+        <!-- Question Container -->
+        <div class="question-container" id="questionContainer">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h4 id="sectionTitle">Section Title</h4>
+                <div class="d-flex align-items-center">
+                    <span class="me-3" id="questionProgress">Question 1 of 20</span>
+                    <div class="timer-display" id="sectionTimer">
+                        <i class="fas fa-stopwatch"></i> <span id="sectionTimeRemaining">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-indicator mb-4">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+
+            <div class="question-card" id="questionCard">
+                <h5 id="questionText">Question will appear here</h5>
+                <div id="questionOptions">
+                    <!-- Options will be loaded here -->
+                </div>
+                <div id="codingArea" style="display: none;">
+                    <label class="form-label">Write your code here:</label>
+                    <textarea class="form-control" id="codeEditor" rows="15" style="font-family: 'Courier New', monospace;"></textarea>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button class="btn btn-outline-secondary" onclick="previousQuestion()" id="prevBtn">
+                    <i class="fas fa-arrow-left"></i> Previous
+                </button>
+                <div>
+                    <button class="btn btn-warning me-2" onclick="markForReview()" id="reviewBtn">
+                        <i class="fas fa-bookmark"></i> Mark for Review
+                    </button>
+                    <button class="btn btn-primary" onclick="nextQuestion()" id="nextBtn">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Results -->
+        <div class="assessment-config" id="resultsSection" style="display: none;">
+            <div class="text-center">
+                <h3><i class="fas fa-trophy"></i> Assessment Complete!</h3>
+                <div id="resultsSummary">
+                    <!-- Results will be loaded here -->
+                </div>
+                <div class="mt-4">
+                    <a href="/assessment-hub" class="btn btn-primary me-2">
+                        <i class="fas fa-home"></i> Back to Hub
+                    </a>
+                    <a href="/performance-analytics" class="btn btn-outline-primary">
+                        <i class="fas fa-chart-line"></i> View Analytics
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let assessmentConfig = null;
+        let currentSection = 0;
+        let currentQuestion = 0;
+        let responses = {};
+        let sectionTimers = {};
+        let globalTimer = null;
+        let markedForReview = new Set();
+
+        // Load assessment configuration
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAssessmentConfig();
+        });
+
+        function loadAssessmentConfig() {
+            // This would typically fetch from backend
+            // For now, we'll use the data from the company route
+            const company = '{{ company }}';
+            
+            fetch('/start-mnc-assessment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({company: company})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    assessmentConfig = data.config;
+                    displayAssessmentConfig();
+                } else {
+                    alert('Error loading assessment: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to load assessment configuration');
+            });
+        }
+
+        function displayAssessmentConfig() {
+            const sectionsDisplay = document.getElementById('sectionsDisplay');
+            sectionsDisplay.innerHTML = '';
+
+            assessmentConfig.sections.forEach((section, index) => {
+                const sectionCard = document.createElement('div');
+                sectionCard.className = 'section-card';
+                sectionCard.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5><i class="fas fa-tasks"></i> ${section.name}</h5>
+                            <p class="text-muted mb-0">${section.questions} questions • ${section.time} minutes</p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="badge bg-primary fs-6">${section.time} min</div>
+                        </div>
+                    </div>
+                `;
+                sectionsDisplay.appendChild(sectionCard);
+            });
+
+            // Display total time
+            const totalTimeCard = document.createElement('div');
+            totalTimeCard.className = 'section-card border-primary';
+            totalTimeCard.innerHTML = `
+                <div class="text-center">
+                    <h5 class="text-primary"><i class="fas fa-clock"></i> Total Assessment Time</h5>
+                    <h3 class="text-primary">${assessmentConfig.total_time} minutes</h3>
+                    <p class="text-muted">Cutoff: ${assessmentConfig.cutoff_percentage}%</p>
+                </div>
+            `;
+            sectionsDisplay.appendChild(totalTimeCard);
+        }
+
+        function startAssessment() {
+            document.getElementById('configSection').style.display = 'none';
+            document.getElementById('sectionTabs').style.display = 'block';
+            document.getElementById('questionContainer').style.display = 'block';
+            
+            // Initialize responses structure
+            assessmentConfig.sections.forEach(section => {
+                responses[section.name] = [];
+            });
+            
+            createSectionTabs();
+            loadSection(0);
+            startGlobalTimer();
+        }
+
+        function createSectionTabs() {
+            const tabsContainer = document.getElementById('sectionTabs');
+            tabsContainer.innerHTML = '';
+            
+            assessmentConfig.sections.forEach((section, index) => {
+                const tabBtn = document.createElement('button');
+                tabBtn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+                tabBtn.innerHTML = `${section.name} <span class="badge bg-secondary ms-1">${section.questions}</span>`;
+                tabBtn.onclick = () => loadSection(index);
+                tabsContainer.appendChild(tabBtn);
+            });
+        }
+
+        function loadSection(sectionIndex) {
+            currentSection = sectionIndex;
+            currentQuestion = 0;
+            
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', index === sectionIndex);
+            });
+            
+            const section = assessmentConfig.sections[sectionIndex];
+            document.getElementById('sectionTitle').textContent = section.name;
+            
+            // Start section timer
+            startSectionTimer(section.time * 60); // Convert minutes to seconds
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            const section = assessmentConfig.sections[currentSection];
+            const questionNum = currentQuestion + 1;
+            
+            document.getElementById('questionProgress').textContent = `Question ${questionNum} of ${section.questions}`;
+            
+            // Update progress bar
+            const progress = (questionNum / section.questions) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            
+            // Generate sample question based on section type
+            const question = generateSampleQuestion(section, currentQuestion);
+            displayQuestion(question);
+            
+            // Update navigation buttons
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').textContent = 
+                currentQuestion === section.questions - 1 ? 'Finish Section' : 'Next';
+        }
+
+        function generateSampleQuestion(section, questionIndex) {
+            // This would typically fetch real questions from backend
+            // For demo purposes, we'll generate sample questions
+            const sampleQuestions = {
+                'Logical Reasoning': [
+                    {
+                        text: "If all roses are flowers and some flowers are red, which conclusion is correct?",
+                        options: [
+                            "All roses are red",
+                            "Some roses may be red", 
+                            "No roses are red",
+                            "All red things are roses"
+                        ],
+                        correct: 1,
+                        type: 'mcq'
+                    }
+                ],
+                'Programming Questions': [
+                    {
+                        text: "Write a function to find the second largest element in an array.",
+                        type: 'coding',
+                        language: 'python'
+                    }
+                ]
+            };
+            
+            // Return appropriate question type
+            if (section.name.includes('Programming') || section.name.includes('Coding')) {
+                return {
+                    text: `Write a function to solve the following problem:\\n\\nProblem ${questionIndex + 1}: Find the maximum sum of a subarray in a given array of integers.`,
+                    type: 'coding',
+                    language: 'python'
+                };
+            } else {
+                return {
+                    text: `${section.name} Question ${questionIndex + 1}: Sample multiple choice question for ${section.name} section.`,
+                    options: [
+                        "Option A - First choice",
+                        "Option B - Second choice", 
+                        "Option C - Third choice",
+                        "Option D - Fourth choice"
+                    ],
+                    correct: Math.floor(Math.random() * 4),
+                    type: 'mcq'
+                };
+            }
+        }
+
+        function displayQuestion(question) {
+            document.getElementById('questionText').textContent = question.text;
+            
+            const optionsContainer = document.getElementById('questionOptions');
+            const codingArea = document.getElementById('codingArea');
+            
+            if (question.type === 'coding') {
+                optionsContainer.style.display = 'none';
+                codingArea.style.display = 'block';
+                document.getElementById('codeEditor').value = '';
+            } else {
+                optionsContainer.style.display = 'block';
+                codingArea.style.display = 'none';
+                
+                optionsContainer.innerHTML = '';
+                question.options.forEach((option, index) => {
+                    const optionBtn = document.createElement('button');
+                    optionBtn.className = 'option-btn';
+                    optionBtn.textContent = `${String.fromCharCode(65 + index)}. ${option}`;
+                    optionBtn.onclick = () => selectOption(index, optionBtn);
+                    optionsContainer.appendChild(optionBtn);
+                });
+            }
+        }
+
+        function selectOption(optionIndex, buttonElement) {
+            // Remove selection from all options
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Select clicked option
+            buttonElement.classList.add('selected');
+            
+            // Store response
+            const sectionName = assessmentConfig.sections[currentSection].name;
+            if (!responses[sectionName]) responses[sectionName] = [];
+            responses[sectionName][currentQuestion] = optionIndex;
+        }
+
+        function nextQuestion() {
+            const section = assessmentConfig.sections[currentSection];
+            
+            if (currentQuestion < section.questions - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                // Move to next section or finish assessment
+                if (currentSection < assessmentConfig.sections.length - 1) {
+                    loadSection(currentSection + 1);
+                } else {
+                    finishAssessment();
+                }
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function markForReview() {
+            const questionId = `${currentSection}_${currentQuestion}`;
+            if (markedForReview.has(questionId)) {
+                markedForReview.delete(questionId);
+                document.getElementById('reviewBtn').innerHTML = '<i class="fas fa-bookmark"></i> Mark for Review';
+            } else {
+                markedForReview.add(questionId);
+                document.getElementById('reviewBtn').innerHTML = '<i class="fas fa-bookmark text-warning"></i> Marked for Review';
+            }
+        }
+
+        function startGlobalTimer() {
+            let timeLeft = assessmentConfig.total_time * 60; // Convert to seconds
+            
+            globalTimer = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay('timeRemaining', timeLeft);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(globalTimer);
+                    finishAssessment();
+                }
+            }, 1000);
+        }
+
+        function startSectionTimer(seconds) {
+            // Clear existing section timer
+            if (sectionTimers[currentSection]) {
+                clearInterval(sectionTimers[currentSection]);
+            }
+            
+            let timeLeft = seconds;
+            sectionTimers[currentSection] = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay('sectionTimeRemaining', timeLeft);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(sectionTimers[currentSection]);
+                    // Auto-move to next section
+                    if (currentSection < assessmentConfig.sections.length - 1) {
+                        loadSection(currentSection + 1);
+                    } else {
+                        finishAssessment();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay(elementId, seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            document.getElementById(elementId).textContent = display;
+        }
+
+        function finishAssessment() {
+            // Clear all timers
+            clearInterval(globalTimer);
+            Object.values(sectionTimers).forEach(timer => clearInterval(timer));
+            
+            // Submit assessment
+            submitAssessment();
+        }
+
+        function submitAssessment() {
+            const submissionData = {
+                company: '{{ company }}',
+                config: assessmentConfig,
+                responses: responses,
+                time_taken: assessmentConfig.total_time * 60 - getTimeRemaining()
+            };
+            
+            fetch('/submit-mnc-assessment', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(submissionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    displayResults(data.results);
+                } else {
+                    alert('Error submitting assessment: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit assessment');
+            });
+        }
+
+        function displayResults(results) {
+            document.getElementById('sectionTabs').style.display = 'none';
+            document.getElementById('questionContainer').style.display = 'none';
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            const summary = document.getElementById('resultsSummary');
+            const passedClass = results.passed_cutoff ? 'text-success' : 'text-danger';
+            const passedIcon = results.passed_cutoff ? 'fa-check-circle' : 'fa-times-circle';
+            
+            summary.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6 mx-auto">
+                        <div class="card border-0 shadow">
+                            <div class="card-body text-center">
+                                <i class="fas ${passedIcon} fa-3x ${passedClass} mb-3"></i>
+                                <h4 class="${passedClass}">${results.feedback}</h4>
+                                <div class="row mt-4">
+                                    <div class="col-6">
+                                        <h3 class="text-primary">${results.total_score}%</h3>
+                                        <p class="text-muted">Your Score</p>
+                                    </div>
+                                    <div class="col-6">
+                                        <h3 class="text-secondary">${results.cutoff_percentage}%</h3>
+                                        <p class="text-muted">Cutoff</p>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <h6>Section-wise Performance:</h6>
+                                    ${Object.entries(results.section_scores).map(([section, score]) => 
+                                        `<div class="d-flex justify-content-between">
+                                            <span>${section}:</span>
+                                            <strong>${score}%</strong>
+                                        </div>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getTimeRemaining() {
+            const display = document.getElementById('timeRemaining').textContent;
+            const [minutes, seconds] = display.split(':').map(Number);
+            return minutes * 60 + seconds;
+        }
+    </script>
+</body>
+</html>

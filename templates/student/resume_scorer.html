@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Scorer - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .upload-area {
+            border: 2px dashed #007bff;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #f8f9ff;
+        }
+        .upload-area:hover {
+            border-color: #0056b3;
+            background: #e7f3ff;
+        }
+        .upload-area.dragover {
+            border-color: #28a745;
+            background: #e8f5e8;
+        }
+        .score-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .score-card:hover {
+            transform: translateY(-5px);
+        }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto;
+        }
+        .score-excellent { background: linear-gradient(45deg, #28a745, #20c997); }
+        .score-good { background: linear-gradient(45deg, #007bff, #17a2b8); }
+        .score-average { background: linear-gradient(45deg, #ffc107, #fd7e14); }
+        .score-poor { background: linear-gradient(45deg, #dc3545, #e83e8c); }
+        
+        .analysis-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            border-left: 4px solid #007bff;
+        }
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Upload Section -->
+        <div id="upload-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card score-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h2><i class="fas fa-file-alt me-2"></i>ATS Resume Scorer</h2>
+                            <p class="mb-0">Get instant feedback on your resume's ATS compatibility and professional quality</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Upload Area -->
+                            <div class="upload-area mb-4" id="upload-area">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-primary mb-3"></i>
+                                <h4>Upload Your Resume</h4>
+                                <p class="text-muted mb-3">Drag and drop your resume here, or click to browse</p>
+                                <input type="file" id="file-input" class="d-none" accept=".pdf,.doc,.docx,.txt">
+                                <button class="btn btn-primary btn-lg" onclick="document.getElementById('file-input').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Choose File
+                                </button>
+                                <p class="mt-3 text-muted small">Supported formats: PDF, DOC, DOCX, TXT (Max 5MB)</p>
+                            </div>
+
+                            <!-- Job Description Input -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label for="job-description" class="form-label">
+                                        <strong><i class="fas fa-briefcase me-2"></i>Job Description (Optional)</strong>
+                                    </label>
+                                    <textarea 
+                                        class="form-control" 
+                                        id="job-description" 
+                                        rows="6" 
+                                        placeholder="Paste the job description here to get targeted analysis and keyword matching..."
+                                    ></textarea>
+                                    <div class="form-text">Adding a job description provides more detailed analysis and keyword optimization suggestions</div>
+                                </div>
+                            </div>
+
+                            <!-- Analysis Options -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="detailed-analysis" checked>
+                                        <label class="form-check-label" for="detailed-analysis">
+                                            <strong>Detailed Analysis</strong>
+                                            <br><small class="text-muted">Include section-by-section breakdown</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="improvement-suggestions" checked>
+                                        <label class="form-check-label" for="improvement-suggestions">
+                                            <strong>Improvement Suggestions</strong>
+                                            <br><small class="text-muted">Get actionable recommendations</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button class="btn btn-success btn-lg px-5" id="analyze-btn" onclick="analyzeResume()" disabled>
+                                    <i class="fas fa-chart-line me-2"></i>Analyze Resume
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div id="results-section" style="display: none;">
+            <div class="row">
+                <!-- Overall Score -->
+                <div class="col-lg-4">
+                    <div class="card score-card mb-4">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5><i class="fas fa-trophy me-2"></i>Overall Score</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="score-circle score-good mb-3" id="overall-score">
+                                85%
+                            </div>
+                            <h6 id="score-rating">Excellent</h6>
+                            <p class="text-muted" id="score-description">Your resume is well-optimized for ATS systems</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Stats -->
+                    <div class="card score-card">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-info-circle me-2"></i>Quick Stats</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6">
+                                    <h5 class="text-primary" id="word-count">245</h5>
+                                    <small>Words</small>
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="text-success" id="skills-found">12</h5>
+                                    <small>Skills</small>
+                                </div>
+                            </div>
+                            <div class="row text-center mt-3">
+                                <div class="col-6">
+                                    <h5 class="text-warning" id="sections-complete">4/5</h5>
+                                    <small>Sections</small>
+                                </div>
+                                <div class="col-6">
+                                    <h5 class="text-info" id="keywords-match">78%</h5>
+                                    <small>Match</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Analysis -->
+                <div class="col-lg-8">
+                    <div class="card score-card">
+                        <div class="card-header bg-success text-white">
+                            <h5><i class="fas fa-chart-bar me-2"></i>Detailed Analysis</h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Score Breakdown -->
+                            <div class="analysis-section">
+                                <h6><i class="fas fa-chart-pie text-primary me-2"></i>Score Breakdown</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>ATS Compatibility</span>
+                                            <strong class="text-success">92%</strong>
+                                        </div>
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar bg-success" style="width: 92%"></div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Content Quality</span>
+                                            <strong class="text-primary">85%</strong>
+                                        </div>
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar bg-primary" style="width: 85%"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Format & Structure</span>
+                                            <strong class="text-info">88%</strong>
+                                        </div>
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar bg-info" style="width: 88%"></div>
+                                        </div>
+                                        
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <span>Skills Presentation</span>
+                                            <strong class="text-warning">75%</strong>
+                                        </div>
+                                        <div class="progress mb-3">
+                                            <div class="progress-bar bg-warning" style="width: 75%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Strengths and Weaknesses -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="analysis-section">
+                                        <h6><i class="fas fa-thumbs-up text-success me-2"></i>Strengths</h6>
+                                        <ul class="list-unstyled" id="strengths-list">
+                                            <li><i class="fas fa-check text-success me-2"></i>Clear professional formatting</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Strong technical skills section</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Quantified achievements</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="analysis-section">
+                                        <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>Areas for Improvement</h6>
+                                        <ul class="list-unstyled" id="weaknesses-list">
+                                            <li><i class="fas fa-arrow-up text-warning me-2"></i>Add more industry keywords</li>
+                                            <li><i class="fas fa-arrow-up text-warning me-2"></i>Include projects section</li>
+                                            <li><i class="fas fa-arrow-up text-warning me-2"></i>Enhance job descriptions</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Keywords Analysis -->
+                            <div class="analysis-section" id="keywords-section" style="display: none;">
+                                <h6><i class="fas fa-key text-primary me-2"></i>Keyword Analysis</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-success">Found Keywords</h6>
+                                        <div id="found-keywords"></div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-danger">Missing Keywords</h6>
+                                        <div id="missing-keywords"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card recommendation-card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-lightbulb me-2"></i>Personalized Recommendations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recommendations-content">
+                                <!-- Recommendations will be populated here -->
+                            </div>
+                            <div class="text-center mt-4">
+                                <button class="btn btn-light me-3" onclick="window.print()">
+                                    <i class="fas fa-print me-2"></i>Print Report
+                                </button>
+                                <button class="btn btn-outline-light me-3" onclick="downloadReport()">
+                                    <i class="fas fa-download me-2"></i>Download PDF
+                                </button>
+                                <button class="btn btn-warning" onclick="resetAnalysis()">
+                                    <i class="fas fa-redo me-2"></i>Analyze Another Resume
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Animation -->
+        <div id="loading-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-6 text-center">
+                    <div class="card score-card">
+                        <div class="card-body p-5">
+                            <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+                            <h4>Analyzing Your Resume...</h4>
+                            <p class="text-muted">Please wait while we evaluate your resume against ATS systems and industry standards.</p>
+                            <div class="progress mt-4">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" id="analysis-progress" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let uploadedFile = null;
+        let analysisResults = null;
+
+        // File upload handling
+        document.getElementById('file-input').addEventListener('change', handleFileSelect);
+        
+        // Drag and drop handling
+        const uploadArea = document.getElementById('upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Validate file type
+            const allowedTypes = ['application/pdf', 'application/msword', 
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+                                'text/plain'];
+            
+            if (!allowedTypes.includes(file.type)) {
+                alert('Please upload a PDF, DOC, DOCX, or TXT file.');
+                return;
+            }
+
+            // Validate file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size must be less than 5MB.');
+                return;
+            }
+
+            uploadedFile = file;
+            
+            // Update UI
+            document.querySelector('.upload-area h4').textContent = file.name;
+            document.querySelector('.upload-area p').textContent = `File size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            document.querySelector('.upload-area i').className = 'fas fa-file-check fa-3x text-success mb-3';
+            document.getElementById('analyze-btn').disabled = false;
+        }
+
+        function analyzeResume() {
+            if (!uploadedFile) {
+                alert('Please select a resume file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('resume_file', uploadedFile);
+            
+            const jobDescription = document.getElementById('job-description').value;
+            if (jobDescription.trim()) {
+                formData.append('job_description', jobDescription);
+            }
+            
+            formData.append('detailed_analysis', document.getElementById('detailed-analysis').checked);
+            formData.append('improvement_suggestions', document.getElementById('improvement-suggestions').checked);
+
+            // Show loading
+            showLoading();
+
+            fetch('/analyze-resume', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                hideLoading();
+                if (data.success) {
+                    analysisResults = data.analysis;
+                    showResults(data.analysis);
+                } else {
+                    alert('Error analyzing resume: ' + data.message);
+                }
+            })
+            .catch(error => {
+                hideLoading();
+                console.error('Error:', error);
+                alert('Failed to analyze resume. Please try again.');
+            });
+        }
+
+        function showLoading() {
+            document.getElementById('upload-section').style.display = 'none';
+            document.getElementById('loading-section').style.display = 'block';
+            
+            // Simulate progress
+            let progress = 0;
+            const progressBar = document.getElementById('analysis-progress');
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 95) {
+                    progress = 95;
+                    clearInterval(interval);
+                }
+                progressBar.style.width = progress + '%';
+            }, 200);
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-section').style.display = 'none';
+        }
+
+        function showResults(analysis) {
+            document.getElementById('results-section').style.display = 'block';
+            
+            // Update overall score
+            const score = analysis.overall_score || 85;
+            const scoreElement = document.getElementById('overall-score');
+            const ratingElement = document.getElementById('score-rating');
+            const descriptionElement = document.getElementById('score-description');
+            
+            scoreElement.textContent = score + '%';
+            
+            if (score >= 90) {
+                scoreElement.className = 'score-circle score-excellent mb-3';
+                ratingElement.textContent = 'Excellent';
+                descriptionElement.textContent = 'Outstanding ATS optimization!';
+            } else if (score >= 80) {
+                scoreElement.className = 'score-circle score-good mb-3';
+                ratingElement.textContent = 'Very Good';
+                descriptionElement.textContent = 'Well-optimized for ATS systems';
+            } else if (score >= 70) {
+                scoreElement.className = 'score-circle score-average mb-3';
+                ratingElement.textContent = 'Good';
+                descriptionElement.textContent = 'Some optimization needed';
+            } else {
+                scoreElement.className = 'score-circle score-poor mb-3';
+                ratingElement.textContent = 'Needs Improvement';
+                descriptionElement.textContent = 'Significant optimization required';
+            }
+
+            // Update quick stats
+            document.getElementById('word-count').textContent = analysis.word_count || 245;
+            document.getElementById('skills-found').textContent = analysis.skills_count || 12;
+            document.getElementById('sections-complete').textContent = (analysis.sections_complete || 4) + '/5';
+            document.getElementById('keywords-match').textContent = (analysis.keyword_match || 78) + '%';
+
+            // Update strengths and weaknesses
+            updateList('strengths-list', analysis.strengths || [
+                'Clear professional formatting',
+                'Strong technical skills section',
+                'Quantified achievements'
+            ], 'fas fa-check text-success me-2');
+
+            updateList('weaknesses-list', analysis.weaknesses || [
+                'Add more industry keywords',
+                'Include projects section',
+                'Enhance job descriptions'
+            ], 'fas fa-arrow-up text-warning me-2');
+
+            // Show keyword analysis if job description provided
+            if (analysis.keyword_analysis) {
+                document.getElementById('keywords-section').style.display = 'block';
+                updateKeywords(analysis.keyword_analysis);
+            }
+
+            // Update recommendations
+            updateRecommendations(analysis.recommendations || []);
+        }
+
+        function updateList(elementId, items, iconClass) {
+            const list = document.getElementById(elementId);
+            list.innerHTML = '';
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="${iconClass}"></i>${item}`;
+                list.appendChild(li);
+            });
+        }
+
+        function updateKeywords(keywordAnalysis) {
+            const foundKeywords = document.getElementById('found-keywords');
+            const missingKeywords = document.getElementById('missing-keywords');
+            
+            foundKeywords.innerHTML = (keywordAnalysis.found || []).map(keyword => 
+                `<span class="badge bg-success me-2 mb-2">${keyword}</span>`
+            ).join('');
+            
+            missingKeywords.innerHTML = (keywordAnalysis.missing || []).map(keyword => 
+                `<span class="badge bg-danger me-2 mb-2">${keyword}</span>`
+            ).join('');
+        }
+
+        function updateRecommendations(recommendations) {
+            const container = document.getElementById('recommendations-content');
+            
+            if (recommendations.length === 0) {
+                recommendations = [
+                    {
+                        area: 'Keywords',
+                        recommendation: 'Include more industry-specific keywords to improve ATS compatibility',
+                        priority: 'high'
+                    },
+                    {
+                        area: 'Formatting',
+                        recommendation: 'Use standard section headers like "Work Experience" and "Education"',
+                        priority: 'medium'
+                    },
+                    {
+                        area: 'Content',
+                        recommendation: 'Add quantified achievements to demonstrate impact',
+                        priority: 'high'
+                    }
+                ];
+            }
+            
+            container.innerHTML = recommendations.map(rec => {
+                const priorityClass = rec.priority === 'high' ? 'danger' : 
+                                    rec.priority === 'medium' ? 'warning' : 'info';
+                return `
+                    <div class="d-flex align-items-start mb-3">
+                        <span class="badge bg-${priorityClass} me-3">${rec.priority?.toUpperCase() || 'INFO'}</span>
+                        <div>
+                            <strong>${rec.area || 'General'}:</strong> ${rec.recommendation}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function downloadReport() {
+            if (!analysisResults) return;
+            
+            // Create a simple text report
+            const report = `
+Resume Analysis Report
+Generated: ${new Date().toLocaleDateString()}
+
+Overall Score: ${analysisResults.overall_score || 85}%
+
+Strengths:
+${(analysisResults.strengths || []).map(s => '• ' + s).join('\n')}
+
+Areas for Improvement:
+${(analysisResults.weaknesses || []).map(w => '• ' + w).join('\n')}
+
+Recommendations:
+${(analysisResults.recommendations || []).map(r => '• ' + r.area + ': ' + r.recommendation).join('\n')}
+            `;
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'resume_analysis_report.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function resetAnalysis() {
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('upload-section').style.display = 'block';
+            
+            // Reset upload area
+            document.querySelector('.upload-area h4').textContent = 'Upload Your Resume';
+            document.querySelector('.upload-area p').textContent = 'Drag and drop your resume here, or click to browse';
+            document.querySelector('.upload-area i').className = 'fas fa-cloud-upload-alt fa-3x text-primary mb-3';
+            document.getElementById('file-input').value = '';
+            document.getElementById('job-description').value = '';
+            document.getElementById('analyze-btn').disabled = true;
+            
+            uploadedFile = null;
+            analysisResults = null;
+        }
+    </script>
+</body>
+</html>

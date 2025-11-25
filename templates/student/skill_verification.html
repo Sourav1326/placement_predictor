@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skill Verification - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .verification-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .verification-card:hover {
+            transform: translateY(-5px);
+        }
+        .skill-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .skill-badge:hover {
+            transform: scale(1.05);
+        }
+        .skill-unverified {
+            background: #f8f9fa;
+            color: #6c757d;
+            border-color: #dee2e6;
+        }
+        .skill-verified-bronze {
+            background: linear-gradient(45deg, #cd7f32, #e6963c);
+            color: white;
+        }
+        .skill-verified-silver {
+            background: linear-gradient(45deg, #c0c0c0, #d4d4d4);
+            color: #333;
+        }
+        .skill-verified-gold {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+        }
+        .skill-verified-platinum {
+            background: linear-gradient(45deg, #e5e4e2, #f0f0f0);
+            color: #333;
+            border: 2px solid #b8860b;
+        }
+        .challenge-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .code-editor {
+            font-family: 'Courier New', monospace;
+            background: #2d3748;
+            color: #e2e8f0;
+            border-radius: 10px;
+            min-height: 300px;
+        }
+        .test-result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+        }
+        .test-passed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .test-failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .progress-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Skill Overview -->
+        <div id="overview-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card verification-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h2><i class="fas fa-certificate me-2"></i>Trust but Verify - Skill Verification</h2>
+                            <p class="mb-0">Earn verified badges through live coding challenges and boost your placement predictions</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <!-- Verification Impact -->
+                            <div class="alert alert-info mb-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <h5><i class="fas fa-chart-line text-primary me-2"></i>Verification Impact</h5>
+                                        <p class="mb-0">Verified skills receive <strong>1.5x-3.0x weight multipliers</strong> in placement predictions, significantly improving your chances!</p>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        <div class="progress-circle" style="background: linear-gradient(45deg, #28a745, #20c997);">
+                                            +250%
+                                        </div>
+                                        <small>Max Boost</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Badge Levels -->
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <h5><i class="fas fa-medal me-2"></i>Verification Levels</h5>
+                                    <div class="row text-center">
+                                        <div class="col-md-3">
+                                            <div class="skill-verified-bronze skill-badge">
+                                                <i class="fas fa-medal me-2"></i>Bronze (1.5x)
+                                            </div>
+                                            <small class="d-block mt-2">Basic proficiency</small>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="skill-verified-silver skill-badge">
+                                                <i class="fas fa-medal me-2"></i>Silver (2.0x)
+                                            </div>
+                                            <small class="d-block mt-2">Intermediate level</small>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="skill-verified-gold skill-badge">
+                                                <i class="fas fa-medal me-2"></i>Gold (2.5x)
+                                            </div>
+                                            <small class="d-block mt-2">Advanced expertise</small>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="skill-verified-platinum skill-badge">
+                                                <i class="fas fa-crown me-2"></i>Platinum (3.0x)
+                                            </div>
+                                            <small class="d-block mt-2">Expert mastery</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Skills Available for Verification -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-code text-primary me-2"></i>Programming Languages</h5>
+                                    <div class="mb-3">
+                                        <span class="skill-badge skill-verified-gold" onclick="startVerification('python')">
+                                            <i class="fab fa-python me-2"></i>Python <i class="fas fa-medal ms-2"></i>
+                                        </span>
+                                        <span class="skill-badge skill-verified-silver" onclick="startVerification('javascript')">
+                                            <i class="fab fa-js me-2"></i>JavaScript <i class="fas fa-medal ms-2"></i>
+                                        </span>
+                                        <span class="skill-badge skill-unverified" onclick="startVerification('java')">
+                                            <i class="fab fa-java me-2"></i>Java
+                                        </span>
+                                        <span class="skill-badge skill-unverified" onclick="startVerification('cpp')">
+                                            <i class="fas fa-code me-2"></i>C++
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-database text-success me-2"></i>Databases & Technologies</h5>
+                                    <div class="mb-3">
+                                        <span class="skill-badge skill-verified-bronze" onclick="startVerification('sql')">
+                                            <i class="fas fa-database me-2"></i>SQL <i class="fas fa-medal ms-2"></i>
+                                        </span>
+                                        <span class="skill-badge skill-unverified" onclick="startVerification('mongodb')">
+                                            <i class="fas fa-leaf me-2"></i>MongoDB
+                                        </span>
+                                        <span class="skill-badge skill-verified-silver" onclick="startVerification('react')">
+                                            <i class="fab fa-react me-2"></i>React <i class="fas fa-medal ms-2"></i>
+                                        </span>
+                                        <span class="skill-badge skill-unverified" onclick="startVerification('nodejs')">
+                                            <i class="fab fa-node-js me-2"></i>Node.js
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Recent Achievements -->
+                            <div class="alert alert-success">
+                                <h6><i class="fas fa-trophy me-2"></i>Recent Achievement</h6>
+                                <p class="mb-0">Congratulations! You earned a <strong>Gold Python Badge</strong> yesterday. Your placement prediction score increased by 15 points!</p>
+                            </div>
+
+                            <div class="text-center">
+                                <p class="text-muted">Click on any skill to start verification challenge</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verification Challenge -->
+        <div id="challenge-section" style="display: none;">
+            <div class="row">
+                <!-- Challenge Details -->
+                <div class="col-lg-8">
+                    <div class="card verification-card challenge-card mb-4">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-code me-2"></i>
+                                    <span id="skill-name">Python</span> Verification Challenge
+                                </h5>
+                                <span class="badge bg-light text-dark" id="difficulty-level">Intermediate</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <h6 id="challenge-title">Two Sum Problem</h6>
+                            <div id="challenge-description">
+                                <p>Given an array of integers <code>nums</code> and an integer <code>target</code>, return indices of the two numbers such that they add up to target.</p>
+                                <p><strong>Example:</strong></p>
+                                <pre>Input: nums = [2,7,11,15], target = 9
+Output: [0,1]
+Explanation: Because nums[0] + nums[1] == 9, we return [0, 1].</pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Code Editor -->
+                    <div class="card verification-card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-edit me-2"></i>Code Editor
+                                </h6>
+                                <div>
+                                    <select class="form-select form-select-sm" id="language-select">
+                                        <option value="python">Python</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="java">Java</option>
+                                        <option value="cpp">C++</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <textarea class="form-control code-editor" id="code-editor" rows="15" placeholder="// Write your solution here...">
+def two_sum(nums, target):
+    # Your solution here
+    pass</textarea>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <button class="btn btn-outline-light me-2" onclick="runTests()">
+                                        <i class="fas fa-play me-2"></i>Run Tests
+                                    </button>
+                                    <button class="btn btn-outline-light" onclick="resetCode()">
+                                        <i class="fas fa-undo me-2"></i>Reset
+                                    </button>
+                                </div>
+                                <div>
+                                    <button class="btn btn-success" onclick="submitSolution()" id="submit-btn" disabled>
+                                        <i class="fas fa-check me-2"></i>Submit Solution
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Challenge Info -->
+                <div class="col-lg-4">
+                    <div class="card verification-card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-clock me-2"></i>Time Remaining</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="display-4 text-primary" id="timer">15:00</div>
+                            <p class="text-muted">For Silver badge</p>
+                        </div>
+                    </div>
+
+                    <div class="card verification-card mb-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h6><i class="fas fa-list-check me-2"></i>Test Cases</h6>
+                        </div>
+                        <div class="card-body" id="test-results">
+                            <div class="test-result">
+                                <i class="fas fa-clock text-muted me-2"></i>Run tests to see results
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card verification-card">
+                        <div class="card-header bg-warning">
+                            <h6><i class="fas fa-lightbulb me-2"></i>Tips</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="fas fa-check text-success me-2"></i>Consider edge cases</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Optimize for time complexity</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Test with provided examples</li>
+                                <li><i class="fas fa-check text-success me-2"></i>Write clean, readable code</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card verification-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h2><i class="fas fa-award me-2"></i>Verification Complete!</h2>
+                        </div>
+                        <div class="card-body text-center">
+                            <div id="badge-earned" class="mb-4">
+                                <div class="skill-verified-silver skill-badge" style="font-size: 1.5rem; padding: 20px 30px;">
+                                    <i class="fas fa-medal me-2"></i>Silver Python Badge
+                                </div>
+                                <p class="mt-3 text-muted">2.0x weight multiplier in placement predictions</p>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-4">
+                                    <h4 class="text-success">92%</h4>
+                                    <p>Code Quality</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4 class="text-primary">08:30</h4>
+                                    <p>Completion Time</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4 class="text-warning">8/10</h4>
+                                    <p>Test Cases Passed</p>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-chart-line me-2"></i>Impact on Placement Prediction</h6>
+                                <p class="mb-0">Your Python skills are now verified with a <strong>Silver badge</strong>! This will increase your placement prediction score by approximately <strong>12-18 points</strong>.</p>
+                            </div>
+
+                            <div class="text-center">
+                                <button class="btn btn-primary me-3" onclick="goBackToOverview()">
+                                    <i class="fas fa-certificate me-2"></i>Verify More Skills
+                                </button>
+                                <a href="/student/dashboard" class="btn btn-outline-primary">
+                                    <i class="fas fa-home me-2"></i>Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSkill = '';
+        let challengeData = null;
+        let timer = null;
+        let timeRemaining = 900; // 15 minutes
+
+        function startVerification(skill) {
+            currentSkill = skill;
+            
+            // Simulate fetching challenge data
+            challengeData = {
+                skill: skill,
+                title: getSkillTitle(skill),
+                difficulty: 'intermediate',
+                description: getChallengeDescription(skill),
+                startingCode: getStartingCode(skill),
+                testCases: getTestCases(skill)
+            };
+            
+            setupChallenge();
+        }
+
+        function getSkillTitle(skill) {
+            const titles = {
+                'python': 'Two Sum Problem',
+                'javascript': 'Array Manipulation',
+                'java': 'String Processing',
+                'cpp': 'Dynamic Programming',
+                'sql': 'Query Optimization',
+                'mongodb': 'Aggregation Pipeline',
+                'react': 'Component Development',
+                'nodejs': 'API Development'
+            };
+            return titles[skill] || 'Coding Challenge';
+        }
+
+        function getChallengeDescription(skill) {
+            const descriptions = {
+                'python': 'Given an array of integers and a target sum, find two numbers that add up to the target.',
+                'javascript': 'Implement a function to manipulate arrays efficiently using modern ES6+ features.',
+                'java': 'Process strings using optimal algorithms and proper object-oriented design.',
+                'cpp': 'Solve a dynamic programming problem with optimal time and space complexity.'
+            };
+            return descriptions[skill] || 'Complete the coding challenge within the time limit.';
+        }
+
+        function getStartingCode(skill) {
+            const code = {
+                'python': 'def two_sum(nums, target):\n    # Your solution here\n    pass',
+                'javascript': 'function twoSum(nums, target) {\n    // Your solution here\n}',
+                'java': 'public int[] twoSum(int[] nums, int target) {\n    // Your solution here\n    return new int[0];\n}',
+                'cpp': 'vector<int> twoSum(vector<int>& nums, int target) {\n    // Your solution here\n    return {};\n}'
+            };
+            return code[skill] || '// Write your solution here';
+        }
+
+        function getTestCases(skill) {
+            return [
+                { input: '[2,7,11,15], 9', expected: '[0,1]', status: 'pending' },
+                { input: '[3,2,4], 6', expected: '[1,2]', status: 'pending' },
+                { input: '[3,3], 6', expected: '[0,1]', status: 'pending' }
+            ];
+        }
+
+        function setupChallenge() {
+            document.getElementById('overview-section').style.display = 'none';
+            document.getElementById('challenge-section').style.display = 'block';
+            
+            document.getElementById('skill-name').textContent = challengeData.skill.charAt(0).toUpperCase() + challengeData.skill.slice(1);
+            document.getElementById('challenge-title').textContent = challengeData.title;
+            document.getElementById('challenge-description').innerHTML = `<p>${challengeData.description}</p>`;
+            document.getElementById('code-editor').value = challengeData.startingCode;
+            document.getElementById('language-select').value = challengeData.skill;
+            
+            updateTestResults();
+            startTimer();
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                document.getElementById('timer').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    submitSolution();
+                }
+            }, 1000);
+        }
+
+        function updateTestResults() {
+            const container = document.getElementById('test-results');
+            container.innerHTML = challengeData.testCases.map((test, index) => {
+                const statusIcon = test.status === 'passed' ? 'fas fa-check text-success' :
+                                 test.status === 'failed' ? 'fas fa-times text-danger' :
+                                 'fas fa-clock text-muted';
+                const statusClass = test.status === 'passed' ? 'test-passed' :
+                                   test.status === 'failed' ? 'test-failed' : '';
+                
+                return `
+                    <div class="test-result ${statusClass}">
+                        <i class="${statusIcon} me-2"></i>
+                        Test ${index + 1}: ${test.input} → ${test.expected}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function runTests() {
+            const code = document.getElementById('code-editor').value;
+            
+            if (!code.trim() || code.includes('pass') || code.includes('// Your solution here')) {
+                alert('Please write your solution before running tests.');
+                return;
+            }
+            
+            // Simulate test execution
+            const passedTests = Math.floor(Math.random() * 3) + 1;
+            
+            challengeData.testCases.forEach((test, index) => {
+                test.status = index < passedTests ? 'passed' : 'failed';
+            });
+            
+            updateTestResults();
+            
+            // Enable submit if at least 2 tests pass
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = passedTests < 2;
+            
+            if (passedTests >= 2) {
+                submitBtn.innerHTML = '<i class="fas fa-check me-2"></i>Submit Solution';
+                submitBtn.className = 'btn btn-success';
+            }
+        }
+
+        function resetCode() {
+            document.getElementById('code-editor').value = challengeData.startingCode;
+            challengeData.testCases.forEach(test => test.status = 'pending');
+            updateTestResults();
+            document.getElementById('submit-btn').disabled = true;
+        }
+
+        function submitSolution() {
+            clearInterval(timer);
+            
+            const code = document.getElementById('code-editor').value;
+            const timeUsed = 900 - timeRemaining;
+            const testsPassed = challengeData.testCases.filter(test => test.status === 'passed').length;
+            
+            // Simulate verification evaluation
+            const score = (testsPassed / challengeData.testCases.length) * 100;
+            const badgeLevel = score >= 90 ? 'gold' : score >= 70 ? 'silver' : 'bronze';
+            
+            showResults({
+                skill: currentSkill,
+                badgeLevel: badgeLevel,
+                score: score,
+                timeUsed: timeUsed,
+                testsPassed: testsPassed,
+                totalTests: challengeData.testCases.length
+            });
+        }
+
+        function showResults(results) {
+            document.getElementById('challenge-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            
+            const badgeClasses = {
+                'bronze': 'skill-verified-bronze',
+                'silver': 'skill-verified-silver',
+                'gold': 'skill-verified-gold',
+                'platinum': 'skill-verified-platinum'
+            };
+            
+            const multipliers = {
+                'bronze': '1.5x',
+                'silver': '2.0x',
+                'gold': '2.5x',
+                'platinum': '3.0x'
+            };
+            
+            const badge = document.getElementById('badge-earned');
+            const skillName = results.skill.charAt(0).toUpperCase() + results.skill.slice(1);
+            const minutes = Math.floor(results.timeUsed / 60);
+            const seconds = results.timeUsed % 60;
+            
+            badge.innerHTML = `
+                <div class="skill-badge ${badgeClasses[results.badgeLevel]}" style="font-size: 1.5rem; padding: 20px 30px;">
+                    <i class="fas fa-medal me-2"></i>${results.badgeLevel.charAt(0).toUpperCase() + results.badgeLevel.slice(1)} ${skillName} Badge
+                </div>
+                <p class="mt-3 text-muted">${multipliers[results.badgeLevel]} weight multiplier in placement predictions</p>
+            `;
+            
+            // Update stats
+            const statsSection = document.querySelector('#results-section .row.mb-4');
+            statsSection.innerHTML = `
+                <div class="col-md-4">
+                    <h4 class="text-success">${Math.round(results.score)}%</h4>
+                    <p>Code Quality</p>
+                </div>
+                <div class="col-md-4">
+                    <h4 class="text-primary">${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}</h4>
+                    <p>Completion Time</p>
+                </div>
+                <div class="col-md-4">
+                    <h4 class="text-warning">${results.testsPassed}/${results.totalTests}</h4>
+                    <p>Test Cases Passed</p>
+                </div>
+            `;
+        }
+
+        function goBackToOverview() {
+            document.getElementById('results-section').style.display = 'none';
+            document.getElementById('overview-section').style.display = 'block';
+            
+            // Reset timer
+            timeRemaining = 900;
+            if (timer) clearInterval(timer);
+        }
+
+        // Language selector change
+        document.getElementById('language-select').addEventListener('change', function() {
+            const selectedLang = this.value;
+            if (selectedLang !== currentSkill) {
+                const code = getStartingCode(selectedLang);
+                document.getElementById('code-editor').value = code;
+            }
+        });
+    </script>
+</body>
+</html>

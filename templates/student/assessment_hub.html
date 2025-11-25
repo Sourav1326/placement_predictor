@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Assessment Hub - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .assessment-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            color: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .assessment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .assessment-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+        .btn-start {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-start:hover {
+            background: white;
+            color: #667eea;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/student-dashboard">
+                <i class="fas fa-graduation-cap"></i> Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/student-dashboard">Dashboard</a>
+                <a class="nav-link" href="/profile">Profile</a>
+                <a class="nav-link" href="/auth/logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="container">
+            <h1><i class="fas fa-brain"></i> Advanced Assessment Hub</h1>
+            <p class="lead">Comprehensive assessments inspired by "Big Tech" hiring practices</p>
+            <p>Enhance your placement chances with our industry-leading assessment modules</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <!-- Comprehensive Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card">
+                    <div class="text-center">
+                        <i class="fas fa-brain assessment-icon"></i>
+                        <h4>🧠 Cognitive Assessment</h4>
+                        <p>Test your logical reasoning, quantitative aptitude, and verbal ability with adaptive difficulty.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Logical Reasoning</li>
+                            <li>• Quantitative Aptitude</li>
+                            <li>• Data Interpretation</li>
+                            <li>• Technical Concepts</li>
+                        </ul>
+                        <a href="/comprehensive-assessment" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Assessment
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Communication Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card">
+                    <div class="text-center">
+                        <i class="fas fa-pen-fancy assessment-icon"></i>
+                        <h4>✍️ Communication Test</h4>
+                        <p>AI-powered evaluation of your written communication skills with NLP analysis.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Grammar & Spelling</li>
+                            <li>• Clarity & Readability</li>
+                            <li>• Professional Tone</li>
+                            <li>• Business Writing</li>
+                        </ul>
+                        <a href="/communication-assessment" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Situational Judgment Test -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card">
+                    <div class="text-center">
+                        <i class="fas fa-users assessment-icon"></i>
+                        <h4>🎯 Behavioral Assessment</h4>
+                        <p>Situational Judgment Tests that analyze your workplace behavior and personality.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Leadership Style</li>
+                            <li>• Team Collaboration</li>
+                            <li>• Problem Solving</li>
+                            <li>• Work Ethics</li>
+                        </ul>
+                        <a href="/situational-judgment-test" class="btn btn-start">
+                            <i class="fas fa-play"></i> Take SJT
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Scorer -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card">
+                    <div class="text-center">
+                        <i class="fas fa-file-alt assessment-icon"></i>
+                        <h4>📄 Resume Scorer</h4>
+                        <p>AI-powered resume analysis with job description matching and optimization tips.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Skills Analysis</li>
+                            <li>• Job Matching</li>
+                            <li>• ATS Optimization</li>
+                            <li>• Keyword Analysis</li>
+                        </ul>
+                        <a href="/resume-scorer" class="btn btn-start">
+                            <i class="fas fa-upload"></i> Analyze Resume
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mock Interview -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card">
+                    <div class="text-center">
+                        <i class="fas fa-microphone assessment-icon"></i>
+                        <h4>🎤 Mock Interview</h4>
+                        <p>AI-powered interview simulator with real-time feedback and STAR method analysis.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Behavioral Questions</li>
+                            <li>• Technical Questions</li>
+                            <li>• STAR Method Analysis</li>
+                            <li>• Communication Scoring</li>
+                        </ul>
+                        <a href="/mock-interview" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Interview
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Analytics -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card">
+                    <div class="text-center">
+                        <i class="fas fa-chart-line assessment-icon"></i>
+                        <h4>📊 Performance Analytics</h4>
+                        <p>Comprehensive analysis of all your assessment results and improvement recommendations.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Performance Trends</li>
+                            <li>• Skill Gap Analysis</li>
+                            <li>• Improvement Plans</li>
+                            <li>• Progress Tracking</li>
+                        </ul>
+                        <button class="btn btn-start" onclick="showAnalytics()">
+                            <i class="fas fa-chart-bar"></i> View Analytics
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MNC Company Assessments Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-building text-primary"></i> MNC Company Mock Assessments
+                </h2>
+                <p class="text-center text-muted mb-4">Practice with real company assessment patterns and previous year questions</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Capgemini Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #0052CC 0%, #004499 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-laptop-code assessment-icon"></i>
+                        <h4>🏢 Capgemini Assessment</h4>
+                        <p>Technical assessment based on Capgemini's actual recruitment pattern with previous year questions.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Logical Reasoning (20 mins)</li>
+                            <li>• Quantitative Aptitude (25 mins)</li>
+                            <li>• Technical MCQs (30 mins)</li>
+                            <li>• Previous Year Questions</li>
+                        </ul>
+                        <a href="/mnc-assessment/capgemini" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Capgemini Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LTIMindtree Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #E31837 0%, #B01530 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-code assessment-icon"></i>
+                        <h4>🌳 LTIMindtree Assessment</h4>
+                        <p>Programming and technical assessment modeled after LTIMindtree's selection process.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Programming Questions (45 mins)</li>
+                            <li>• System Design (15 mins)</li>
+                            <li>• Technical Aptitude (30 mins)</li>
+                            <li>• Previous Year Coding Problems</li>
+                        </ul>
+                        <a href="/mnc-assessment/ltimindtree" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start LTI Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TCS Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #004A8F 0%, #003366 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-globe assessment-icon"></i>
+                        <h4>🔵 TCS CodeVita Style</h4>
+                        <p>TCS NQT and Digital assessment pattern with coding challenges and aptitude tests.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Numerical Ability (26 mins)</li>
+                            <li>• Verbal Ability (24 mins)</li>
+                            <li>• Programming Logic (30 mins)</li>
+                            <li>• Advanced Coding (40 mins)</li>
+                        </ul>
+                        <a href="/mnc-assessment/tcs" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start TCS Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Infosys Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #007CC3 0%, #005A8B 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-network-wired assessment-icon"></i>
+                        <h4>🔷 Infosys HackWithInfy</h4>
+                        <p>Infosys-style technical assessment with problem-solving and coding challenges.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Logical Reasoning (35 mins)</li>
+                            <li>• Verbal Ability (35 mins)</li>
+                            <li>• Programming (45 mins)</li>
+                            <li>• Previous HackWithInfy Problems</li>
+                        </ul>
+                        <a href="/mnc-assessment/infosys" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Infosys Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Wipro Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #7B68EE 0%, #6A5ACD 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-cogs assessment-icon"></i>
+                        <h4>⚙️ Wipro WILP Assessment</h4>
+                        <p>Wipro's Work Integrated Learning Program assessment with technical focus.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• English Comprehension (20 mins)</li>
+                            <li>• Analytical Ability (20 mins)</li>
+                            <li>• Technical Assessment (40 mins)</li>
+                            <li>• Previous Year Patterns</li>
+                        </ul>
+                        <a href="/mnc-assessment/wipro" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Wipro Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accenture Assessment -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #A100FF 0%, #8E00E8 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-rocket assessment-icon"></i>
+                        <h4>🚀 Accenture Assessment</h4>
+                        <p>Accenture's cognitive and technical assessment with real interview questions.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Cognitive Ability (90 mins)</li>
+                            <li>• Technical Assessment (40 mins)</li>
+                            <li>• Communication Assessment</li>
+                            <li>• Previous Year Questions</li>
+                        </ul>
+                        <a href="/mnc-assessment/accenture" class="btn btn-start">
+                            <i class="fas fa-play"></i> Start Accenture Test
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Previous Year Questions Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-history text-success"></i> Previous Year Question Banks
+                </h2>
+                <p class="text-center text-muted mb-4">Access curated collections of previous year questions from top MNCs</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Previous Year Questions Bank -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #28a745 0%, #20a039 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-archive assessment-icon"></i>
+                        <h4>📚 Question Bank</h4>
+                        <p>Comprehensive collection of previous year questions from all major MNCs with solutions.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• 2000+ Previous Year Questions</li>
+                            <li>• Detailed Solutions</li>
+                            <li>• Company-wise Categories</li>
+                            <li>• Difficulty-wise Sorting</li>
+                        </ul>
+                        <a href="/previous-year-questions" class="btn btn-start">
+                            <i class="fas fa-book"></i> Browse Questions
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mock Interview Series -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #fd7e14 0%, #e8590c 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-users-cog assessment-icon"></i>
+                        <h4>🎭 Company Mock Interviews</h4>
+                        <p>Company-specific mock interviews with real HR and technical questions patterns.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• HR Round Questions</li>
+                            <li>• Technical Round Simulation</li>
+                            <li>• Company-specific Scenarios</li>
+                            <li>• Real Interview Experiences</li>
+                        </ul>
+                        <a href="/company-mock-interviews" class="btn btn-start">
+                            <i class="fas fa-microphone-alt"></i> Start Mock Interview
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Assessment Reports -->
+            <div class="col-md-6 col-lg-4">
+                <div class="assessment-card" style="background: linear-gradient(135deg, #6f42c1 0%, #5a36a3 100%);">
+                    <div class="text-center">
+                        <i class="fas fa-file-medical-alt assessment-icon"></i>
+                        <h4>📋 Assessment Reports</h4>
+                        <p>Detailed performance reports comparing your scores with company cutoffs and benchmarks.</p>
+                        <ul class="list-unstyled text-start mb-3">
+                            <li>• Company Cutoff Analysis</li>
+                            <li>• Percentile Scoring</li>
+                            <li>• Weakness Identification</li>
+                            <li>• Improvement Roadmap</li>
+                        </ul>
+                        <a href="/assessment-reports" class="btn btn-start">
+                            <i class="fas fa-chart-pie"></i> View Reports
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-0 shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-trophy text-warning"></i> Your Assessment Journey
+                        </h5>
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h3 class="text-primary" id="completedAssessments">0</h3>
+                                <small class="text-muted">Assessments Completed</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 class="text-success" id="averageScore">0%</h3>
+                                <small class="text-muted">Average Score</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 class="text-info" id="skillsIdentified">0</h3>
+                                <small class="text-muted">Skills Identified</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h3 class="text-warning" id="improvementAreas">0</h3>
+                                <small class="text-muted">Areas to Improve</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Load assessment statistics
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAssessmentStats();
+        });
+
+        function loadAssessmentStats() {
+            // This would typically fetch from the backend
+            // For now, showing placeholder values
+            document.getElementById('completedAssessments').textContent = '0';
+            document.getElementById('averageScore').textContent = '0%';
+            document.getElementById('skillsIdentified').textContent = '0';
+            document.getElementById('improvementAreas').textContent = '0';
+        }
+
+        function showAnalytics() {
+            window.location.href = '/performance-analytics';
+        }
+    </script>
+</body>
+</html>

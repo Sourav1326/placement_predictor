@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Assessment - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .assessment-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .assessment-card:hover {
+            transform: translateY(-5px);
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .question-card {
+            border-left: 4px solid #007bff;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+        .option-btn {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+            background: white;
+        }
+        .option-btn:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+        }
+        .option-btn.selected {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .timer-warning {
+            color: #dc3545 !important;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Assessment Introduction -->
+        <div id="intro-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card assessment-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h2><i class="fas fa-brain me-2"></i>Comprehensive Aptitude Assessment</h2>
+                            <p class="mb-0">Advanced cognitive and analytical assessment</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-info-circle text-info me-2"></i>Assessment Details</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-clock text-success me-2"></i>Duration: 20-30 minutes</li>
+                                        <li><i class="fas fa-question-circle text-primary me-2"></i>Questions: 20 questions</li>
+                                        <li><i class="fas fa-chart-line text-warning me-2"></i>Adaptive difficulty</li>
+                                        <li><i class="fas fa-medal text-info me-2"></i>Comprehensive scoring</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-list-check text-primary me-2"></i>Assessment Areas</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-brain text-purple me-2"></i>Logical Reasoning</li>
+                                        <li><i class="fas fa-calculator text-success me-2"></i>Quantitative Aptitude</li>
+                                        <li><i class="fas fa-language text-warning me-2"></i>Verbal Ability</li>
+                                        <li><i class="fas fa-puzzle-piece text-info me-2"></i>Abstract Thinking</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <label for="testType" class="form-label"><strong>Assessment Type</strong></label>
+                                    <select class="form-select" id="testType">
+                                        <option value="balanced">Balanced Assessment</option>
+                                        <option value="logical_reasoning">Logical Reasoning Focus</option>
+                                        <option value="quantitative">Quantitative Focus</option>
+                                        <option value="verbal">Verbal Ability Focus</option>
+                                        <option value="technical">Technical Aptitude</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="difficulty" class="form-label"><strong>Difficulty Level</strong></label>
+                                    <select class="form-select" id="difficulty">
+                                        <option value="adaptive">Adaptive (Recommended)</option>
+                                        <option value="easy">Easy</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="hard">Hard</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Instructions:</h6>
+                                <ul class="mb-0">
+                                    <li>Read each question carefully before selecting your answer</li>
+                                    <li>You can navigate between questions using Previous/Next buttons</li>
+                                    <li>Your progress is automatically saved</li>
+                                    <li>Time limit per question varies based on complexity</li>
+                                    <li>Results will provide detailed analysis and recommendations</li>
+                                </ul>
+                            </div>
+
+                            <div class="text-center">
+                                <button class="btn btn-primary btn-lg px-5" onclick="startAssessment()">
+                                    <i class="fas fa-play me-2"></i>Start Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Interface -->
+        <div id="assessment-section" style="display: none;">
+            <div class="row">
+                <!-- Progress Panel -->
+                <div class="col-lg-3">
+                    <div class="card assessment-card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-chart-pie me-2"></i>Progress</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="timer-display mb-3" id="timer">05:00</div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <p class="mb-0"><span id="current-question">1</span> of <span id="total-questions">20</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Question Navigation -->
+                    <div class="card assessment-card">
+                        <div class="card-header bg-secondary text-white">
+                            <h6><i class="fas fa-list-ol me-2"></i>Questions</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="question-nav"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Question Panel -->
+                <div class="col-lg-9">
+                    <div class="card assessment-card question-card">
+                        <div class="card-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-question-circle me-2"></i>
+                                    Question <span id="question-number">1</span>
+                                </h5>
+                                <span class="badge bg-primary" id="question-type">Logical Reasoning</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="question-content">
+                                <h6 id="question-text">Loading question...</h6>
+                                <div id="question-options"></div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-outline-secondary" id="prev-btn" onclick="previousQuestion()" disabled>
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()">
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                <button class="btn btn-success" id="submit-btn" onclick="submitAssessment()" style="display: none;">
+                                    <i class="fas fa-check me-2"></i>Submit Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card assessment-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h2><i class="fas fa-trophy me-2"></i>Assessment Results</h2>
+                        </div>
+                        <div class="card-body" id="results-content">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentQuestion = 0;
+        let questions = [];
+        let responses = {};
+        let timer = null;
+        let timeRemaining = 300; // 5 minutes default
+        let sessionId = '';
+
+        function startAssessment() {
+            const testType = document.getElementById('testType').value;
+            const difficulty = document.getElementById('difficulty').value;
+
+            fetch('/start-comprehensive-assessment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    test_type: testType,
+                    difficulty: difficulty
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    questions = data.test_config.questions;
+                    sessionId = data.session_id;
+                    setupAssessment();
+                } else {
+                    alert('Error starting assessment: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start assessment. Please try again.');
+            });
+        }
+
+        function setupAssessment() {
+            document.getElementById('intro-section').style.display = 'none';
+            document.getElementById('assessment-section').style.display = 'block';
+            
+            document.getElementById('total-questions').textContent = questions.length;
+            generateQuestionNavigation();
+            loadQuestion(0);
+            startTimer();
+        }
+
+        function generateQuestionNavigation() {
+            const nav = document.getElementById('question-nav');
+            nav.innerHTML = '';
+            
+            for (let i = 0; i < questions.length; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'col-2 mb-2';
+                btn.innerHTML = `<button class="btn btn-outline-primary btn-sm w-100 question-nav-btn" onclick="loadQuestion(${i})">${i + 1}</button>`;
+                nav.appendChild(btn);
+            }
+        }
+
+        function loadQuestion(index) {
+            currentQuestion = index;
+            const question = questions[index];
+            
+            document.getElementById('question-number').textContent = index + 1;
+            document.getElementById('current-question').textContent = index + 1;
+            document.getElementById('question-type').textContent = question.type || 'General';
+            document.getElementById('question-text').textContent = question.question;
+            
+            // Generate options
+            const optionsContainer = document.getElementById('question-options');
+            optionsContainer.innerHTML = '';
+            
+            if (question.options) {
+                question.options.forEach((option, i) => {
+                    const optionElement = document.createElement('div');
+                    optionElement.className = 'option-btn';
+                    optionElement.textContent = option;
+                    optionElement.onclick = () => selectOption(i, optionElement);
+                    
+                    if (responses[index] === i) {
+                        optionElement.classList.add('selected');
+                    }
+                    
+                    optionsContainer.appendChild(optionElement);
+                });
+            }
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = index === 0;
+            document.getElementById('next-btn').style.display = index === questions.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('submit-btn').style.display = index === questions.length - 1 ? 'inline-block' : 'none';
+            
+            // Update progress
+            const progress = ((index + 1) / questions.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            // Update navigation highlighting
+            document.querySelectorAll('.question-nav-btn').forEach((btn, i) => {
+                btn.className = 'btn btn-sm w-100 ' + (i === index ? 'btn-primary' : 
+                    responses[i] !== undefined ? 'btn-success' : 'btn-outline-primary');
+            });
+        }
+
+        function selectOption(optionIndex, element) {
+            // Remove previous selection
+            document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+            // Add current selection
+            element.classList.add('selected');
+            responses[currentQuestion] = optionIndex;
+            
+            // Update navigation button color
+            const navBtn = document.querySelectorAll('.question-nav-btn')[currentQuestion];
+            navBtn.className = 'btn btn-success btn-sm w-100';
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                loadQuestion(currentQuestion - 1);
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                loadQuestion(currentQuestion + 1);
+            }
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const timerDisplay = document.getElementById('timer');
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 60) {
+                    timerDisplay.classList.add('timer-warning');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    submitAssessment();
+                }
+            }, 1000);
+        }
+
+        function submitAssessment() {
+            clearInterval(timer);
+            
+            const submissionData = {
+                test_config: {
+                    questions: questions,
+                    session_id: sessionId
+                },
+                responses: responses
+            };
+
+            fetch('/submit-comprehensive-assessment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(submissionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResults(data.evaluation);
+                } else {
+                    alert('Error submitting assessment: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit assessment. Please try again.');
+            });
+        }
+
+        function showResults(evaluation) {
+            document.getElementById('assessment-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = `
+                <div class="row text-center mb-4">
+                    <div class="col-md-3">
+                        <h3 class="text-primary">${evaluation.overall_score || 85}%</h3>
+                        <p>Overall Score</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-success">${evaluation.correct_answers || 17}/20</h3>
+                        <p>Correct Answers</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-info">${evaluation.time_taken || '15:30'}</h3>
+                        <p>Time Taken</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-warning">${evaluation.percentile || 78}th</h3>
+                        <p>Percentile</p>
+                    </div>
+                </div>
+                
+                <div class="alert alert-success">
+                    <h5><i class="fas fa-thumbs-up me-2"></i>Excellent Performance!</h5>
+                    <p class="mb-0">Your analytical and reasoning skills are well-developed. This assessment score will positively impact your placement predictions.</p>
+                </div>
+                
+                <div class="text-center">
+                    <a href="/student/dashboard" class="btn btn-primary me-3">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Results
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

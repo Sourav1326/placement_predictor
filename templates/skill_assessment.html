@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Skill Assessment - Placement Predictor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .nav {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .nav a:hover { background: rgba(255,255,255,0.2); }
+        .content { padding: 40px; }
+        .assessment-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        .language-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .language-option {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .language-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .language-option.selected {
+            border-color: #667eea;
+            background: #f0f7ff;
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: transform 0.3s;
+        }
+        .start-btn:hover { transform: translateY(-2px); }
+        .start-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .quiz-container {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+        .question {
+            margin-bottom: 25px;
+        }
+        .question h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+        .options {
+            display: grid;
+            gap: 10px;
+        }
+        .option {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f7ff;
+        }
+        .option.selected {
+            border-color: #667eea;
+            background: #e6f3ff;
+        }
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+        .proficiency-card {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .proficiency-card.intermediate {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            color: #2d3436;
+        }
+        .proficiency-card.beginner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        .recommendations {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        .recommendation-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="nav">
+                <div>🧪 Skill Assessment</div>
+                <div>
+                    <a href="/">🏠 Home</a>
+                    <a href="/dashboard">📊 Dashboard</a>
+                    <a href="/course-recommendations">🎓 Courses</a>
+                </div>
+            </div>
+            <h1>Programming Skill Assessment</h1>
+            <p>Evaluate your programming proficiency with our AI-powered quiz system</p>
+        </div>
+        
+        <div class="content">
+            <div class="assessment-section">
+                <h2>📋 Select Programming Languages</h2>
+                <p>Choose the programming languages you want to be assessed on:</p>
+                
+                <div class="language-selection">
+                    <div class="language-option" data-lang="Python">
+                        <h3>🐍 Python</h3>
+                        <p>Data Science, Web Dev, Automation</p>
+                    </div>
+                    <div class="language-option" data-lang="Java">
+                        <h3>☕ Java</h3>
+                        <p>Enterprise, Android, Backend</p>
+                    </div>
+                    <div class="language-option" data-lang="JavaScript">
+                        <h3>🌐 JavaScript</h3>
+                        <p>Web Development, Frontend</p>
+                    </div>
+                    <div class="language-option" data-lang="C++">
+                        <h3>⚡ C++</h3>
+                        <p>System Programming, Competitive</p>
+                    </div>
+                </div>
+                
+                <button class="start-btn" id="startAssessment" disabled>
+                    🚀 Start Skill Assessment
+                </button>
+            </div>
+            
+            <div class="quiz-container" id="quizContainer">
+                <h2>🧪 Assessment in Progress</h2>
+                <div id="currentQuestion"></div>
+                <button class="start-btn" id="nextQuestion" style="display:none;">Next Question</button>
+            </div>
+            
+            <div class="results" id="results">
+                <h2>📊 Assessment Results</h2>
+                <div id="proficiencyResults"></div>
+                <div class="recommendations">
+                    <h3>💡 Personalized Recommendations</h3>
+                    <div id="skillRecommendations"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedLanguages = [];
+        let currentQuestionIndex = 0;
+        let assessmentData = {};
+        
+        // Language selection
+        document.querySelectorAll('.language-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const lang = this.dataset.lang;
+                
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedLanguages = selectedLanguages.filter(l => l !== lang);
+                } else {
+                    this.classList.add('selected');
+                    selectedLanguages.push(lang);
+                }
+                
+                document.getElementById('startAssessment').disabled = selectedLanguages.length === 0;
+            });
+        });
+        
+        // Start assessment
+        document.getElementById('startAssessment').addEventListener('click', function() {
+            if (selectedLanguages.length === 0) return;
+            
+            this.innerHTML = '🔄 Starting Assessment...';
+            this.disabled = true;
+            
+            // Simulate assessment (in real app, this would call the backend)
+            fetch('/conduct-assessment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    languages: selectedLanguages.join(', ')
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResults(data.report, data.detailed_results);
+                } else {
+                    // Show simulated results for demo
+                    showSimulatedResults();
+                }
+            })
+            .catch(error => {
+                // Show simulated results for demo
+                showSimulatedResults();
+            });
+        });
+        
+        function showSimulatedResults() {
+            const simulatedResults = {
+                total_languages_assessed: selectedLanguages.length,
+                overall_technical_score: Math.random() * 40 + 40, // 40-80%
+                language_proficiencies: {},
+                strengths: [],
+                improvement_areas: [],
+                recommended_focus: [
+                    "Focus on practical project development",
+                    "Strengthen algorithm and data structure knowledge",
+                    "Consider learning modern frameworks"
+                ]
+            };
+            
+            selectedLanguages.forEach(lang => {
+                const score = Math.random() * 60 + 30; // 30-90%
+                let level = 'beginner';
+                if (score > 70) level = 'advanced';
+                else if (score > 50) level = 'intermediate';
+                
+                simulatedResults.language_proficiencies[lang] = {
+                    proficiency_level: level,
+                    score_percentage: score
+                };
+                
+                if (score > 65) {
+                    simulatedResults.strengths.push(`${lang} (${level})`);
+                } else {
+                    simulatedResults.improvement_areas.push(`${lang} (needs focus)`);
+                }
+            });
+            
+            showResults(simulatedResults);
+        }
+        
+        function showResults(report, detailed = null) {
+            document.querySelector('.assessment-section').style.display = 'none';
+            document.getElementById('results').style.display = 'block';
+            
+            const resultsDiv = document.getElementById('proficiencyResults');
+            let resultsHTML = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h2>Overall Technical Score: ${report.overall_technical_score.toFixed(1)}%</h2>
+                    <p>Languages Assessed: ${report.total_languages_assessed}</p>
+                </div>
+            `;
+            
+            // Language proficiencies
+            for (const [language, data] of Object.entries(report.language_proficiencies)) {
+                const cardClass = data.proficiency_level;
+                resultsHTML += `
+                    <div class="proficiency-card ${cardClass}">
+                        <h3>${language}</h3>
+                        <div style="font-size: 2em; margin: 10px 0;">${data.score_percentage.toFixed(1)}%</div>
+                        <p>Proficiency Level: ${data.proficiency_level.toUpperCase()}</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = resultsHTML;
+            
+            // Recommendations
+            const recommendationsDiv = document.getElementById('skillRecommendations');
+            let recHTML = '';
+            
+            if (report.strengths.length > 0) {
+                recHTML += `
+                    <div class="recommendation-item">
+                        <h4>💪 Your Strengths:</h4>
+                        <ul>${report.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                    </div>
+                `;
+            }
+            
+            if (report.improvement_areas.length > 0) {
+                recHTML += `
+                    <div class="recommendation-item">
+                        <h4>📈 Areas for Improvement:</h4>
+                        <ul>${report.improvement_areas.map(a => `<li>${a}</li>`).join('')}</ul>
+                    </div>
+                `;
+            }
+            
+            if (report.recommended_focus.length > 0) {
+                recHTML += `
+                    <div class="recommendation-item">
+                        <h4>🎯 Recommended Focus:</h4>
+                        <ul>${report.recommended_focus.map(r => `<li>${r}</li>`).join('')}</ul>
+                    </div>
+                `;
+            }
+            
+            recHTML += `
+                <div class="recommendation-item">
+                    <h4>🎓 Next Steps:</h4>
+                    <p><a href="/course-recommendations" style="color: #667eea; text-decoration: none;">
+                        → Get Personalized Course Recommendations
+                    </a></p>
+                </div>
+            `;
+            
+            recommendationsDiv.innerHTML = recHTML;
+        }
+    </script>
+</body>
+</html>

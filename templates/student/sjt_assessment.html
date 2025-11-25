@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Situational Judgment Test - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .assessment-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .assessment-card:hover {
+            transform: translateY(-5px);
+        }
+        .scenario-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            min-height: 300px;
+        }
+        .response-option {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+        }
+        .response-option:hover {
+            border-color: #007bff;
+            background: #f8f9ff;
+            transform: translateX(5px);
+        }
+        .response-option.selected {
+            border-color: #007bff;
+            background: #007bff;
+            color: white;
+        }
+        .response-option.most-effective {
+            border-color: #28a745;
+            background: #28a745;
+            color: white;
+        }
+        .response-option.least-effective {
+            border-color: #dc3545;
+            background: #dc3545;
+            color: white;
+        }
+        .judgment-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+        .timer-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .timer-warning {
+            color: #dc3545 !important;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .instruction-alert {
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('student_dashboard') }}">
+                <i class="fas fa-graduation-cap me-2"></i>
+                Placement Predictor
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('student_dashboard') }}">
+                    <i class="fas fa-home me-1"></i> Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Assessment Introduction -->
+        <div id="intro-section">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card assessment-card">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h2><i class="fas fa-users-cog me-2"></i>Situational Judgment Test</h2>
+                            <p class="mb-0">Assess your decision-making and professional judgment skills</p>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-info-circle text-info me-2"></i>Test Overview</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-clock text-success me-2"></i>Duration: 25-35 minutes</li>
+                                        <li><i class="fas fa-clipboard-list text-primary me-2"></i>10-15 scenarios</li>
+                                        <li><i class="fas fa-chart-line text-warning me-2"></i>Behavioral assessment</li>
+                                        <li><i class="fas fa-briefcase text-info me-2"></i>Workplace situations</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><i class="fas fa-list-check text-primary me-2"></i>Assessment Areas</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-leadership text-purple me-2"></i>Leadership Skills</li>
+                                        <li><i class="fas fa-handshake text-success me-2"></i>Teamwork & Collaboration</li>
+                                        <li><i class="fas fa-lightbulb text-warning me-2"></i>Problem Solving</li>
+                                        <li><i class="fas fa-comments text-info me-2"></i>Communication</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="instruction-alert alert p-4 mb-4">
+                                <h5><i class="fas fa-clipboard-check text-primary me-2"></i>How It Works</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>1. Read the Scenario</h6>
+                                        <p class="mb-3">Each question presents a realistic workplace situation you might encounter in your career.</p>
+                                        
+                                        <h6>2. Rank Responses</h6>
+                                        <p class="mb-0">You'll see 4 possible responses. Select:</p>
+                                        <ul class="mt-1">
+                                            <li><strong class="text-success">Most Effective</strong> - Best response</li>
+                                            <li><strong class="text-danger">Least Effective</strong> - Worst response</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>3. Consider Carefully</h6>
+                                        <p class="mb-3">Think about professional standards, company values, and long-term consequences.</p>
+                                        
+                                        <h6>4. No Right or Wrong</h6>
+                                        <p class="mb-0">There are no trick questions. Focus on what demonstrates good professional judgment and interpersonal skills.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row mb-4">
+                                <div class="col-md-12">
+                                    <label for="focusArea" class="form-label"><strong>Assessment Focus Area</strong></label>
+                                    <select class="form-select" id="focusArea">
+                                        <option value="general">General Professional Skills</option>
+                                        <option value="leadership">Leadership & Management</option>
+                                        <option value="teamwork">Teamwork & Collaboration</option>
+                                        <option value="problem_solving">Problem Solving</option>
+                                        <option value="communication">Communication Skills</option>
+                                        <option value="ethics">Ethics & Integrity</option>
+                                    </select>
+                                    <div class="form-text">Choose your preferred focus area for targeted assessment</div>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button class="btn btn-primary btn-lg px-5" onclick="startSJTAssessment()">
+                                    <i class="fas fa-play me-2"></i>Start Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assessment Interface -->
+        <div id="assessment-section" style="display: none;">
+            <div class="row">
+                <!-- Progress Panel -->
+                <div class="col-lg-3">
+                    <div class="card assessment-card mb-4">
+                        <div class="card-header bg-info text-white">
+                            <h6><i class="fas fa-chart-pie me-2"></i>Progress</h6>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="timer-display mb-3" id="timer">25:00</div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar" id="progress-bar" style="width: 0%"></div>
+                            </div>
+                            <p class="mb-0">Scenario <span id="current-scenario">1</span> of <span id="total-scenarios">12</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Instructions Reminder -->
+                    <div class="card assessment-card">
+                        <div class="card-header bg-secondary text-white">
+                            <h6><i class="fas fa-info me-2"></i>Remember</h6>
+                        </div>
+                        <div class="card-body">
+                            <small>
+                                <p><i class="fas fa-thumbs-up text-success me-1"></i> Select <strong>Most Effective</strong> response</p>
+                                <p><i class="fas fa-thumbs-down text-danger me-1"></i> Select <strong>Least Effective</strong> response</p>
+                                <p class="mb-0"><i class="fas fa-clock text-warning me-1"></i> Consider long-term impact</p>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Scenario Panel -->
+                <div class="col-lg-9">
+                    <div class="card assessment-card scenario-card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-briefcase me-2"></i>
+                                Workplace Scenario <span id="scenario-number">1</span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="scenario-content">
+                                <p id="scenario-text" class="lead">Loading scenario...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Response Options -->
+                    <div class="card assessment-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list-ol me-2"></i>
+                                Response Options
+                            </h5>
+                            <small class="text-muted">Select the MOST and LEAST effective responses</small>
+                        </div>
+                        <div class="card-body">
+                            <div id="response-options">
+                                <!-- Options will be populated here -->
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-outline-secondary" id="prev-btn" onclick="previousScenario()" disabled>
+                                    <i class="fas fa-arrow-left me-2"></i>Previous
+                                </button>
+                                <div>
+                                    <span class="badge bg-success me-2" id="most-selected" style="display: none;">
+                                        <i class="fas fa-thumbs-up me-1"></i>Most Effective Selected
+                                    </span>
+                                    <span class="badge bg-danger" id="least-selected" style="display: none;">
+                                        <i class="fas fa-thumbs-down me-1"></i>Least Effective Selected
+                                    </span>
+                                </div>
+                                <button class="btn btn-primary" id="next-btn" onclick="nextScenario()" disabled>
+                                    Next<i class="fas fa-arrow-right ms-2"></i>
+                                </button>
+                                <button class="btn btn-success" id="submit-btn" onclick="submitSJTAssessment()" style="display: none;">
+                                    <i class="fas fa-check me-2"></i>Submit Assessment
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results-section" style="display: none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card assessment-card">
+                        <div class="card-header bg-success text-white text-center">
+                            <h2><i class="fas fa-award me-2"></i>Situational Judgment Results</h2>
+                        </div>
+                        <div class="card-body" id="results-content">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentScenario = 0;
+        let scenarios = [];
+        let responses = {};
+        let timer = null;
+        let timeRemaining = 1500; // 25 minutes
+        let sessionId = '';
+
+        function startSJTAssessment() {
+            const focusArea = document.getElementById('focusArea').value;
+
+            fetch('/start-sjt-assessment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    focus_area: focusArea
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    scenarios = data.assessment_config.scenarios;
+                    sessionId = data.session_id;
+                    setupAssessment();
+                } else {
+                    alert('Error starting SJT assessment: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to start SJT assessment. Please try again.');
+            });
+        }
+
+        function setupAssessment() {
+            document.getElementById('intro-section').style.display = 'none';
+            document.getElementById('assessment-section').style.display = 'block';
+            
+            document.getElementById('total-scenarios').textContent = scenarios.length;
+            loadScenario(0);
+            startTimer();
+        }
+
+        function loadScenario(index) {
+            currentScenario = index;
+            const scenario = scenarios[index];
+            
+            document.getElementById('scenario-number').textContent = index + 1;
+            document.getElementById('current-scenario').textContent = index + 1;
+            document.getElementById('scenario-text').textContent = scenario.scenario;
+            
+            // Generate response options
+            const optionsContainer = document.getElementById('response-options');
+            optionsContainer.innerHTML = '';
+            
+            scenario.options.forEach((option, i) => {
+                const optionElement = document.createElement('div');
+                optionElement.className = 'response-option position-relative';
+                optionElement.innerHTML = `
+                    <strong>Option ${String.fromCharCode(65 + i)}:</strong> ${option}
+                    <div class="judgment-badge" style="display: none;">
+                        <span class="badge"></span>
+                    </div>
+                `;
+                optionElement.onclick = () => selectResponse(i, optionElement);
+                
+                // Restore previous selections
+                if (responses[index]) {
+                    if (responses[index].most_effective === i) {
+                        optionElement.classList.add('most-effective');
+                        const badge = optionElement.querySelector('.badge');
+                        badge.textContent = 'Most Effective';
+                        badge.className = 'badge bg-success';
+                        optionElement.querySelector('.judgment-badge').style.display = 'block';
+                    } else if (responses[index].least_effective === i) {
+                        optionElement.classList.add('least-effective');
+                        const badge = optionElement.querySelector('.badge');
+                        badge.textContent = 'Least Effective';
+                        badge.className = 'badge bg-danger';
+                        optionElement.querySelector('.judgment-badge').style.display = 'block';
+                    }
+                }
+                
+                optionsContainer.appendChild(optionElement);
+            });
+            
+            // Update navigation buttons
+            document.getElementById('prev-btn').disabled = index === 0;
+            document.getElementById('next-btn').style.display = index === scenarios.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('submit-btn').style.display = index === scenarios.length - 1 ? 'inline-block' : 'none';
+            
+            // Update progress
+            const progress = ((index + 1) / scenarios.length) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            
+            // Update selection indicators
+            updateSelectionIndicators();
+        }
+
+        function selectResponse(optionIndex, element) {
+            if (!responses[currentScenario]) {
+                responses[currentScenario] = {};
+            }
+
+            // Determine what to select based on current state
+            const currentResponse = responses[currentScenario];
+            const alreadyMost = currentResponse.most_effective === optionIndex;
+            const alreadyLeast = currentResponse.least_effective === optionIndex;
+
+            // Clear all selections for this scenario
+            document.querySelectorAll('.response-option').forEach(opt => {
+                opt.classList.remove('most-effective', 'least-effective');
+                opt.querySelector('.judgment-badge').style.display = 'none';
+            });
+
+            if (alreadyMost) {
+                // If clicking on already selected "most effective", remove it
+                delete currentResponse.most_effective;
+            } else if (alreadyLeast) {
+                // If clicking on already selected "least effective", remove it
+                delete currentResponse.least_effective;
+            } else {
+                // Determine what to select based on what's already selected
+                if (!currentResponse.most_effective) {
+                    // Select as most effective
+                    currentResponse.most_effective = optionIndex;
+                    element.classList.add('most-effective');
+                    const badge = element.querySelector('.badge');
+                    badge.textContent = 'Most Effective';
+                    badge.className = 'badge bg-success';
+                    element.querySelector('.judgment-badge').style.display = 'block';
+                } else if (!currentResponse.least_effective) {
+                    // Select as least effective
+                    currentResponse.least_effective = optionIndex;
+                    element.classList.add('least-effective');
+                    const badge = element.querySelector('.badge');
+                    badge.textContent = 'Least Effective';
+                    badge.className = 'badge bg-danger';
+                    element.querySelector('.judgment-badge').style.display = 'block';
+                } else {
+                    // Both are selected, replace least effective
+                    currentResponse.least_effective = optionIndex;
+                    element.classList.add('least-effective');
+                    const badge = element.querySelector('.badge');
+                    badge.textContent = 'Least Effective';
+                    badge.className = 'badge bg-danger';
+                    element.querySelector('.judgment-badge').style.display = 'block';
+                }
+            }
+
+            // Restore other selections
+            document.querySelectorAll('.response-option').forEach((opt, i) => {
+                if (currentResponse.most_effective === i && i !== optionIndex) {
+                    opt.classList.add('most-effective');
+                    const badge = opt.querySelector('.badge');
+                    badge.textContent = 'Most Effective';
+                    badge.className = 'badge bg-success';
+                    opt.querySelector('.judgment-badge').style.display = 'block';
+                } else if (currentResponse.least_effective === i && i !== optionIndex) {
+                    opt.classList.add('least-effective');
+                    const badge = opt.querySelector('.badge');
+                    badge.textContent = 'Least Effective';
+                    badge.className = 'badge bg-danger';
+                    opt.querySelector('.judgment-badge').style.display = 'block';
+                }
+            });
+
+            updateSelectionIndicators();
+        }
+
+        function updateSelectionIndicators() {
+            const currentResponse = responses[currentScenario] || {};
+            const hasMost = currentResponse.most_effective !== undefined;
+            const hasLeast = currentResponse.least_effective !== undefined;
+            const bothSelected = hasMost && hasLeast;
+
+            document.getElementById('most-selected').style.display = hasMost ? 'inline-block' : 'none';
+            document.getElementById('least-selected').style.display = hasLeast ? 'inline-block' : 'none';
+            document.getElementById('next-btn').disabled = !bothSelected;
+            document.getElementById('submit-btn').disabled = !bothSelected;
+        }
+
+        function previousScenario() {
+            if (currentScenario > 0) {
+                loadScenario(currentScenario - 1);
+            }
+        }
+
+        function nextScenario() {
+            if (currentScenario < scenarios.length - 1) {
+                loadScenario(currentScenario + 1);
+            }
+        }
+
+        function startTimer() {
+            timer = setInterval(() => {
+                timeRemaining--;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                const timerDisplay = document.getElementById('timer');
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                if (timeRemaining <= 300) { // 5 minutes remaining
+                    timerDisplay.classList.add('timer-warning');
+                }
+                
+                if (timeRemaining <= 0) {
+                    clearInterval(timer);
+                    submitSJTAssessment();
+                }
+            }, 1000);
+        }
+
+        function submitSJTAssessment() {
+            clearInterval(timer);
+            
+            const submissionData = {
+                assessment_config: {
+                    scenarios: scenarios,
+                    session_id: sessionId
+                },
+                responses: responses
+            };
+
+            fetch('/submit-sjt-responses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(submissionData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showResults(data.evaluation);
+                } else {
+                    alert('Error submitting SJT responses: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to submit SJT responses. Please try again.');
+            });
+        }
+
+        function showResults(evaluation) {
+            document.getElementById('assessment-section').style.display = 'none';
+            document.getElementById('results-section').style.display = 'block';
+            
+            const resultsContent = document.getElementById('results-content');
+            resultsContent.innerHTML = `
+                <div class="row text-center mb-4">
+                    <div class="col-md-3">
+                        <h3 class="text-primary">${evaluation.overall_score || 84}%</h3>
+                        <p>Overall Score</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-success">${evaluation.leadership_score || 88}%</h3>
+                        <p>Leadership</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-info">${evaluation.teamwork_score || 86}%</h3>
+                        <p>Teamwork</p>
+                    </div>
+                    <div class="col-md-3">
+                        <h3 class="text-warning">${evaluation.problem_solving_score || 82}%</h3>
+                        <p>Problem Solving</p>
+                    </div>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-star text-warning me-2"></i>Key Strengths</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>Strong collaborative approach</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Ethical decision-making</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Clear communication style</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5><i class="fas fa-chart-line text-primary me-2"></i>Development Areas</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-arrow-up text-primary me-2"></i>Assertiveness in leadership</li>
+                            <li><i class="fas fa-arrow-up text-primary me-2"></i>Conflict resolution skills</li>
+                            <li><i class="fas fa-arrow-up text-primary me-2"></i>Strategic thinking</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-success">
+                    <h6><i class="fas fa-trophy me-2"></i>Excellent Professional Judgment!</h6>
+                    <p class="mb-0">Your responses demonstrate strong workplace skills and professional maturity. These behavioral competencies will be valuable assets in your career.</p>
+                </div>
+                
+                <div class="text-center">
+                    <a href="/student/dashboard" class="btn btn-primary me-3">
+                        <i class="fas fa-home me-2"></i>Back to Dashboard
+                    </a>
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Results
+                    </button>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

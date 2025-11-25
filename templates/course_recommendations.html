@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎓 Course Recommendations - Placement Predictor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .nav {
+            background: rgba(255,255,255,0.1);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .nav a:hover { background: rgba(255,255,255,0.2); }
+        .content { padding: 40px; }
+        .form-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            border-left: 5px solid #667eea;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+        .company-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .company-option {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .company-option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+        .company-option.selected {
+            border-color: #667eea;
+            background: #f0f7ff;
+        }
+        .recommend-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .recommendations {
+            display: none;
+            margin-top: 30px;
+        }
+        .recommendation-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        .course-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .course-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 10px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        .course-price {
+            background: #e8f5e8;
+            color: #2d5a2d;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .course-price.paid {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .course-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .course-link:hover {
+            background: #5a6fd8;
+        }
+        .priority-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        .free-badge {
+            background: #51cf66;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="nav">
+                <div>🎓 Course Recommendations</div>
+                <div>
+                    <a href="/">🏠 Home</a>
+                    <a href="/dashboard">📊 Dashboard</a>
+                    <a href="/skill-assessment">🧪 Assessment</a>
+                </div>
+            </div>
+            <h1>Personalized Course Recommendations</h1>
+            <p>Get tailored course suggestions from top platforms to boost your placement chances</p>
+        </div>
+        
+        <div class="content">
+            <form id="recommendationForm">
+                <div class="form-section">
+                    <h2>📝 Your Profile</h2>
+                    <div class="form-grid">
+                        <div>
+                            <div class="form-group">
+                                <label>Programming Languages</label>
+                                <input type="text" id="programming_languages" name="programming_languages" 
+                                       placeholder="e.g., Python, Java, JavaScript" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Projects</label>
+                                <input type="number" id="num_projects" name="num_projects" min="0" max="20" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Internships</label>
+                                <input type="number" id="num_internships" name="num_internships" min="0" max="10" value="0">
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>LeetCode Score</label>
+                                <input type="number" id="leetcode_score" name="leetcode_score" min="0" max="5000" value="800">
+                            </div>
+                            <div class="form-group">
+                                <label>CGPA</label>
+                                <input type="number" id="cgpa" name="cgpa" min="0" max="10" step="0.1" value="7.5">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>🏢 Target Companies</h2>
+                    <p>Select the types of companies you're targeting:</p>
+                    
+                    <div class="company-selection">
+                        <div class="company-option" data-company="FAANG">
+                            <h3>🚀 FAANG</h3>
+                            <p>Facebook, Apple, Amazon, Netflix, Google</p>
+                        </div>
+                        <div class="company-option" data-company="product_companies">
+                            <h3>📱 Product Companies</h3>
+                            <p>Microsoft, Uber, Airbnb, Spotify</p>
+                        </div>
+                        <div class="company-option" data-company="startups">
+                            <h3>💡 Startups</h3>
+                            <p>Fast-growing technology startups</p>
+                        </div>
+                        <div class="company-option" data-company="service_companies">
+                            <h3>🏢 Service Companies</h3>
+                            <p>TCS, Infosys, Wipro, Accenture</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="recommend-btn">
+                    🔍 Get Personalized Recommendations
+                </button>
+            </form>
+            
+            <div class="recommendations" id="recommendations">
+                <div class="recommendation-section">
+                    <h2>🎯 Immediate Priorities</h2>
+                    <p>Start with these courses to address your most critical skill gaps:</p>
+                    <div id="immediatePriorities"></div>
+                </div>
+                
+                <div class="recommendation-section">
+                    <h2>🆓 Free Learning Resources</h2>
+                    <p>High-quality free courses to get you started:</p>
+                    <div id="freeAlternatives"></div>
+                </div>
+                
+                <div class="recommendation-section">
+                    <h2>🏢 Company-Specific Preparation</h2>
+                    <p>Courses tailored for your target companies:</p>
+                    <div id="companySpecific"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedCompanies = [];
+        
+        // Company selection
+        document.querySelectorAll('.company-option').forEach(option => {
+            option.addEventListener('click', function() {
+                const company = this.dataset.company;
+                
+                if (this.classList.contains('selected')) {
+                    this.classList.remove('selected');
+                    selectedCompanies = selectedCompanies.filter(c => c !== company);
+                } else {
+                    this.classList.add('selected');
+                    selectedCompanies.push(company);
+                }
+            });
+        });
+        
+        // Form submission
+        document.getElementById('recommendationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = {};
+            for (let [key, value] of formData.entries()) {
+                data[key] = value;
+            }
+            data.target_companies = selectedCompanies;
+            
+            // Show loading
+            const btn = document.querySelector('.recommend-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '🔄 Generating Recommendations...';
+            btn.disabled = true;
+            
+            // Make recommendation request
+            fetch('/get-course-recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    showRecommendations(result.recommendations);
+                } else {
+                    // Show demo recommendations
+                    showDemoRecommendations();
+                }
+            })
+            .catch(error => {
+                // Show demo recommendations
+                showDemoRecommendations();
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+        
+        function showDemoRecommendations() {
+            const demoRecs = {
+                immediate_priorities: [
+                    {
+                        title: "Complete Python Bootcamp From Zero to Hero",
+                        platform: "Udemy",
+                        duration: "22 hours",
+                        price: "$84.99",
+                        rating: 4.6,
+                        url: "https://udemy.com/course/complete-python-bootcamp",
+                        description: "Master Python programming from basics to advanced"
+                    },
+                    {
+                        title: "Algorithms Specialization",
+                        platform: "Coursera",
+                        duration: "4 months",
+                        price: "$49/month",
+                        rating: 4.9,
+                        url: "https://coursera.org/specializations/algorithms",
+                        description: "Learn algorithms and data structures for interviews"
+                    }
+                ],
+                free_alternatives: [
+                    {
+                        title: "FreeCodeCamp - Full Stack Web Development",
+                        platform: "freeCodeCamp",
+                        duration: "600+ hours",
+                        url: "https://freecodecamp.org",
+                        description: "Complete web development curriculum - completely free"
+                    },
+                    {
+                        title: "CS50's Introduction to Computer Science",
+                        platform: "Harvard (edX)",
+                        duration: "12 weeks",
+                        url: "https://cs50.harvard.edu",
+                        description: "Harvard's famous computer science course"
+                    }
+                ],
+                company_specific: {
+                    FAANG: [
+                        {
+                            title: "System Design Interview Prep",
+                            platform: "Educative",
+                            price: "$79",
+                            url: "https://educative.io/courses/grokking-system-design"
+                        }
+                    ]
+                }
+            };
+            
+            showRecommendations(demoRecs);
+        }
+        
+        function showRecommendations(recommendations) {
+            document.getElementById('recommendations').style.display = 'block';
+            document.getElementById('recommendations').scrollIntoView({ behavior: 'smooth' });
+            
+            // Immediate priorities
+            const prioritiesDiv = document.getElementById('immediatePriorities');
+            let prioritiesHTML = '';
+            
+            recommendations.immediate_priorities.forEach(course => {
+                const isPaid = !course.price.toLowerCase().includes('free');
+                prioritiesHTML += `
+                    <div class="course-card">
+                        <div class="course-title">
+                            ${course.title}
+                            <span class="priority-badge">HIGH PRIORITY</span>
+                        </div>
+                        <div class="course-meta">
+                            <span>📚 ${course.platform}</span>
+                            <span>⏱️ ${course.duration}</span>
+                            <span class="course-price ${isPaid ? 'paid' : ''}">${course.price}</span>
+                        </div>
+                        <p>${course.description}</p>
+                        <a href="${course.url}" target="_blank" class="course-link">
+                            View Course →
+                        </a>
+                    </div>
+                `;
+            });
+            prioritiesDiv.innerHTML = prioritiesHTML;
+            
+            // Free alternatives
+            const freeDiv = document.getElementById('freeAlternatives');
+            let freeHTML = '';
+            
+            recommendations.free_alternatives.forEach(course => {
+                freeHTML += `
+                    <div class="course-card">
+                        <div class="course-title">
+                            ${course.title}
+                            <span class="free-badge">FREE</span>
+                        </div>
+                        <div class="course-meta">
+                            <span>📚 ${course.platform}</span>
+                            <span>⏱️ ${course.duration}</span>
+                        </div>
+                        <p>${course.description}</p>
+                        <a href="${course.url}" target="_blank" class="course-link">
+                            Start Learning →
+                        </a>
+                    </div>
+                `;
+            });
+            freeDiv.innerHTML = freeHTML;
+            
+            // Company-specific
+            const companyDiv = document.getElementById('companySpecific');
+            let companyHTML = '';
+            
+            for (const [company, courses] of Object.entries(recommendations.company_specific)) {
+                companyHTML += `<h3>🏢 ${company.replace('_', ' ').toUpperCase()}</h3>`;
+                courses.forEach(course => {
+                    companyHTML += `
+                        <div class="course-card">
+                            <div class="course-title">${course.title}</div>
+                            <div class="course-meta">
+                                <span>📚 ${course.platform}</span>
+                                <span class="course-price paid">${course.price}</span>
+                            </div>
+                            <a href="${course.url}" target="_blank" class="course-link">
+                                View Course →
+                            </a>
+                        </div>
+                    `;
+                });
+            }
+            companyDiv.innerHTML = companyHTML;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assessment Reports - Placement Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { 
+            background: linear-gradient(135deg, #6f42c1 0%, #5a36a3 100%); 
+            min-height: 100vh; 
+        }
+        .main-content { margin-top: 80px; padding: 20px 0; }
+        .report-card { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
+            padding: 30px; 
+            margin-bottom: 20px; 
+        }
+        .metric-card {
+            background: linear-gradient(135deg, #6f42c1 0%, #5a36a3 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .company-comparison {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .cutoff-indicator {
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        .cutoff-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
+            border-radius: 10px;
+            position: relative;
+        }
+        .score-marker {
+            position: absolute;
+            top: -5px;
+            width: 2px;
+            height: 30px;
+            background: #000;
+            z-index: 2;
+        }
+        .improvement-item {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+        }
+        .strength-item {
+            background: #d1edff;
+            border: 1px solid #92c5f7;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #007bff;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .percentile-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: conic-gradient(#6f42c1 var(--percentile, 0%), #e9ecef 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            margin: 0 auto;
+        }
+        .percentile-circle::before {
+            content: '';
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            position: absolute;
+        }
+        .percentile-text {
+            position: relative;
+            z-index: 1;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #6f42c1;
+        }
+        .trend-up { color: #28a745; }
+        .trend-down { color: #dc3545; }
+        .trend-stable { color: #6c757d; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: rgba(111, 66, 193, 0.9);">
+        <div class="container">
+            <a class="navbar-brand" href="/assessment-hub">
+                <i class="fas fa-arrow-left"></i> Back to Assessment Hub
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/student-dashboard">Dashboard</a>
+                <a class="nav-link" href="/assessment-hub">Assessments</a>
+                <a class="nav-link" href="/performance-analytics">Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-content">
+        <!-- Header -->
+        <div class="report-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="fas fa-file-medical-alt" style="color: #6f42c1;"></i> Assessment Reports</h2>
+                    <p class="text-muted mb-0">Detailed performance analysis with company cutoffs and improvement roadmap</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <button class="btn btn-outline-primary" onclick="downloadReport()">
+                        <i class="fas fa-download"></i> Download Report
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h3 id="overallScore">0%</h3>
+                    <p><i class="fas fa-trophy"></i> Overall Score</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h3 id="percentileRank">0th</h3>
+                    <p><i class="fas fa-chart-line"></i> Percentile Rank</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h3 id="companiesPassed">0/6</h3>
+                    <p><i class="fas fa-building"></i> Companies Cleared</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card">
+                    <h3 id="improvementNeeded">0</h3>
+                    <p><i class="fas fa-target"></i> Areas to Improve</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Trends -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="chart-container">
+                    <h5><i class="fas fa-chart-line"></i> Performance Trends</h5>
+                    <canvas id="performanceTrendChart" height="200"></canvas>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="chart-container text-center">
+                    <h5><i class="fas fa-percentage"></i> Percentile Ranking</h5>
+                    <div class="percentile-circle" style="--percentile: 252deg;">
+                        <div class="percentile-text">70th</div>
+                    </div>
+                    <p class="mt-3 text-muted">You performed better than 70% of test takers</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Company Cutoff Analysis -->
+        <div class="report-card">
+            <h5><i class="fas fa-building"></i> Company Cutoff Analysis</h5>
+            <p class="text-muted">Compare your scores with company-specific cutoffs</p>
+            
+            <div id="companyCutoffs">
+                <!-- Company cutoff comparisons will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Subject-wise Performance -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h5><i class="fas fa-chart-radar"></i> Subject-wise Performance</h5>
+                    <canvas id="subjectChart" height="300"></canvas>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h5><i class="fas fa-chart-pie"></i> Time Management</h5>
+                    <canvas id="timeChart" height="300"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Strengths and Weaknesses -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-thumbs-up text-success"></i> Your Strengths</h5>
+                    <div id="strengthsList">
+                        <!-- Strengths will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="report-card">
+                    <h5><i class="fas fa-exclamation-triangle text-warning"></i> Areas for Improvement</h5>
+                    <div id="improvementsList">
+                        <!-- Improvements will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Recommendations -->
+        <div class="report-card">
+            <h5><i class="fas fa-route"></i> Improvement Roadmap</h5>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Priority</th>
+                                    <th>Skill Area</th>
+                                    <th>Current Level</th>
+                                    <th>Target Level</th>
+                                    <th>Recommended Action</th>
+                                    <th>Timeline</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roadmapTable">
+                                <!-- Roadmap items will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Plan -->
+        <div class="report-card">
+            <h5><i class="fas fa-tasks"></i> 30-Day Action Plan</h5>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="fas fa-calendar-week"></i> Week 1-2</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success"></i> Focus on Quantitative Aptitude</li>
+                                <li><i class="fas fa-check text-success"></i> Practice 50 questions daily</li>
+                                <li><i class="fas fa-check text-success"></i> Review basic concepts</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="fas fa-calendar-week"></i> Week 3</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-clock text-warning"></i> Improve Programming Speed</li>
+                                <li><i class="fas fa-clock text-warning"></i> Solve coding problems</li>
+                                <li><i class="fas fa-clock text-warning"></i> Time-bound practice</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="fas fa-calendar-week"></i> Week 4</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-target text-info"></i> Take mock tests</li>
+                                <li><i class="fas fa-target text-info"></i> Company-specific practice</li>
+                                <li><i class="fas fa-target text-info"></i> Interview preparation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample data - in real implementation, this would be fetched from backend
+        const reportData = {
+            overallScore: 72,
+            percentileRank: 70,
+            companiesPassed: 4,
+            totalCompanies: 6,
+            improvementAreas: 3,
+            performanceTrend: [65, 68, 70, 72, 75, 72],
+            trendLabels: ['Test 1', 'Test 2', 'Test 3', 'Test 4', 'Test 5', 'Test 6'],
+            subjectScores: {
+                'Quantitative Aptitude': 65,
+                'Logical Reasoning': 78,
+                'Verbal Ability': 82,
+                'Programming': 68,
+                'Technical Knowledge': 75
+            },
+            timeManagement: {
+                'Time Saved': 15,
+                'Optimal Time': 70,
+                'Time Exceeded': 15
+            },
+            companyCutoffs: [
+                { name: 'TCS', cutoff: 60, score: 72, passed: true },
+                { name: 'Infosys', cutoff: 65, score: 72, passed: true },
+                { name: 'Wipro', cutoff: 60, score: 72, passed: true },
+                { name: 'Capgemini', cutoff: 70, score: 72, passed: true },
+                { name: 'Accenture', cutoff: 75, score: 72, passed: false },
+                { name: 'LTIMindtree', cutoff: 80, score: 72, passed: false }
+            ],
+            strengths: [
+                'Strong logical reasoning skills',
+                'Excellent verbal communication',
+                'Good problem-solving approach',
+                'Consistent performance across tests'
+            ],
+            improvements: [
+                'Quantitative aptitude needs focus',
+                'Programming speed should be improved',
+                'Time management in technical sections'
+            ]
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReportData();
+            createCharts();
+        });
+
+        function loadReportData() {
+            // Update metrics
+            document.getElementById('overallScore').textContent = reportData.overallScore + '%';
+            document.getElementById('percentileRank').textContent = reportData.percentileRank + 'th';
+            document.getElementById('companiesPassed').textContent = `${reportData.companiesPassed}/${reportData.totalCompanies}`;
+            document.getElementById('improvementNeeded').textContent = reportData.improvementAreas;
+
+            // Load company cutoffs
+            loadCompanyCutoffs();
+            
+            // Load strengths and improvements
+            loadStrengthsAndImprovements();
+            
+            // Load roadmap
+            loadRoadmap();
+        }
+
+        function loadCompanyCutoffs() {
+            const container = document.getElementById('companyCutoffs');
+            container.innerHTML = '';
+
+            reportData.companyCutoffs.forEach(company => {
+                const cutoffDiv = document.createElement('div');
+                cutoffDiv.className = 'company-comparison';
+                
+                const passedClass = company.passed ? 'text-success' : 'text-danger';
+                const passedIcon = company.passed ? 'fa-check-circle' : 'fa-times-circle';
+                
+                cutoffDiv.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h6 class="mb-0">${company.name}</h6>
+                            <small class="text-muted">Cutoff: ${company.cutoff}%</small>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="cutoff-indicator">
+                                <div class="cutoff-bar" style="width: 100%;">
+                                    <div class="score-marker" style="left: ${company.score}%;"></div>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small>0%</small>
+                                <small>Your Score: ${company.score}%</small>
+                                <small>100%</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <span class="${passedClass}">
+                                <i class="fas ${passedIcon}"></i> 
+                                ${company.passed ? 'Passed' : 'Failed'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(cutoffDiv);
+            });
+        }
+
+        function loadStrengthsAndImprovements() {
+            // Load strengths
+            const strengthsList = document.getElementById('strengthsList');
+            strengthsList.innerHTML = '';
+            reportData.strengths.forEach(strength => {
+                const strengthDiv = document.createElement('div');
+                strengthDiv.className = 'strength-item';
+                strengthDiv.innerHTML = `
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    ${strength}
+                `;
+                strengthsList.appendChild(strengthDiv);
+            });
+
+            // Load improvements
+            const improvementsList = document.getElementById('improvementsList');
+            improvementsList.innerHTML = '';
+            reportData.improvements.forEach(improvement => {
+                const improvementDiv = document.createElement('div');
+                improvementDiv.className = 'improvement-item';
+                improvementDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    ${improvement}
+                `;
+                improvementsList.appendChild(improvementDiv);
+            });
+        }
+
+        function loadRoadmap() {
+            const roadmapData = [
+                {
+                    priority: 'High',
+                    skill: 'Quantitative Aptitude',
+                    current: 'Beginner',
+                    target: 'Intermediate',
+                    action: 'Practice 30 questions daily, focus on time & distance',
+                    timeline: '2 weeks'
+                },
+                {
+                    priority: 'Medium',
+                    skill: 'Programming Speed',
+                    current: 'Intermediate',
+                    target: 'Advanced',
+                    action: 'Solve 5 coding problems daily with time limits',
+                    timeline: '3 weeks'
+                },
+                {
+                    priority: 'Low',
+                    skill: 'Technical Knowledge',
+                    current: 'Good',
+                    target: 'Excellent',
+                    action: 'Review core CS concepts, practice MCQs',
+                    timeline: '4 weeks'
+                }
+            ];
+
+            const tableBody = document.getElementById('roadmapTable');
+            tableBody.innerHTML = '';
+
+            roadmapData.forEach(item => {
+                const row = document.createElement('tr');
+                const priorityClass = item.priority === 'High' ? 'danger' : item.priority === 'Medium' ? 'warning' : 'info';
+                
+                row.innerHTML = `
+                    <td><span class="badge bg-${priorityClass}">${item.priority}</span></td>
+                    <td>${item.skill}</td>
+                    <td>${item.current}</td>
+                    <td>${item.target}</td>
+                    <td>${item.action}</td>
+                    <td>${item.timeline}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function createCharts() {
+            // Performance Trend Chart
+            const performanceCtx = document.getElementById('performanceTrendChart').getContext('2d');
+            new Chart(performanceCtx, {
+                type: 'line',
+                data: {
+                    labels: reportData.trendLabels,
+                    datasets: [{
+                        label: 'Score %',
+                        data: reportData.performanceTrend,
+                        borderColor: '#6f42c1',
+                        backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Subject-wise Performance Chart
+            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+            new Chart(subjectCtx, {
+                type: 'radar',
+                data: {
+                    labels: Object.keys(reportData.subjectScores),
+                    datasets: [{
+                        label: 'Score %',
+                        data: Object.values(reportData.subjectScores),
+                        borderColor: '#6f42c1',
+                        backgroundColor: 'rgba(111, 66, 193, 0.2)',
+                        pointBackgroundColor: '#6f42c1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Time Management Chart
+            const timeCtx = document.getElementById('timeChart').getContext('2d');
+            new Chart(timeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(reportData.timeManagement),
+                    datasets: [{
+                        data: Object.values(reportData.timeManagement),
+                        backgroundColor: ['#28a745', '#6f42c1', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function downloadReport() {
+            // In real implementation, this would generate and download a PDF report
+            alert('Downloading comprehensive assessment report...\\n\\nReport includes:\\n- Detailed performance analysis\\n- Company-wise comparison\\n- Personalized improvement plan\\n- 30-day action roadmap');
+        }
+    </script>
+</body>
+</html>
