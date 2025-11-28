@@ -1,4 +1,4 @@
-# Qoder AI Project
+Placement Predictor
 
 This project is a complete career guidance platform designed to help students improve their job placement prospects through data-driven insights, skill verification, and AI-powered recommendations.
 
